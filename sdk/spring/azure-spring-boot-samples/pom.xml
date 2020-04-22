@@ -134,7 +134,7 @@
 
   <modules>
     <module>azure-spring-boot-sample-active-directory</module>
-<!--    <module>azure-spring-boot-sample-active-directory-b2c-oidc</module>-->
+    <module>azure-spring-boot-sample-active-directory-b2c-oidc</module>
     <module>azure-spring-boot-sample-active-directory-backend</module>
     <module>azure-spring-boot-sample-active-directory-backend-v2</module>
     <module>azure-spring-boot-sample-active-directory-stateless</module>
