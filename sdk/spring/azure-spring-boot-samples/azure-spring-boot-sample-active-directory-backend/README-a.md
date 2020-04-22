@@ -2,11 +2,11 @@
 
 #### Register your application with your Azure Active Directory Tenant
 
-Follow the guide [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-oauth-code#register-your-application-with-your-ad-tenant).
+Follow the guide [here](https://docs.microsoft.com/azure/active-directory/develop/active-directory-protocols-oauth-code#register-your-application-with-your-ad-tenant).
 
 #### Configure groups for sign in user
 
-In order to try the authorization action with this sample with minimum effort, [configure the user and groups in Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-groups-create-azure-portal), configure the user with `group1`. 
+In order to try the authorization action with this sample with minimum effort, [configure the user and groups in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/active-directory-groups-create-azure-portal), configure the user with `group1`. 
 
 
 #### Configure application.properties
@@ -68,7 +68,7 @@ azure.activedirectory.active-directory-groups=group1, group2
 ### FAQ
 
 #### If registered application is not multi-tenanted, how to run this sample?
-In this auto-configuration, by [default](https://github.com/Microsoft/azure-spring-boot/blob/master/azure-spring-boot/src/main/resources/aad-oauth2-common.properties#L1-L4) `/common` is used for the tenant value. According to [Active Directory Sign In Request format](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-openid-connect-code#send-the-sign-in-request), if your application is not multi-tenanted, you have to configure a tenant specific authorization endpoints.
+In this auto-configuration, by [default](https://github.com/Microsoft/azure-spring-boot/blob/master/azure-spring-boot/src/main/resources/aad-oauth2-common.properties#L1-L4) `/common` is used for the tenant value. According to [Active Directory Sign In Request format](https://docs.microsoft.com/azure/active-directory/develop/active-directory-protocols-openid-connect-code#send-the-sign-in-request), if your application is not multi-tenanted, you have to configure a tenant specific authorization endpoints.
 
 Configure endpoints with specific tenant-id by replacing `common` in your application.properties file:
 ```properties
