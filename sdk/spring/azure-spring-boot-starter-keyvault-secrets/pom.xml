@@ -35,6 +35,11 @@
       <artifactId>azure-spring-boot</artifactId>
       <version>2.2.5-beta.1</version> <!-- {x-version-update;com.microsoft.azure:azure-spring-boot;current} -->
     </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-core</artifactId>
+      <version>1.4.0-beta.1</version> <!-- {x-version-update;unreleased_com.azure:azure-core;dependency} -->
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -46,6 +51,7 @@
           <rules>
             <bannedDependencies>
               <includes>
+                <include>com.azure:*</include>
                 <include>com.microsoft.azure:*</include>
                 <include>org.springframework.boot:spring-boot-starter:[2.2.0.RELEASE]</include> <!-- {x-include-update;org.springframework.boot:spring-boot-starter;external_dependency} -->
                 <include>org.springframework.boot:spring-boot-starter-validation:[2.2.0.RELEASE]</include> <!-- {x-include-update;org.springframework.boot:spring-boot-starter-validation;external_dependency} -->
