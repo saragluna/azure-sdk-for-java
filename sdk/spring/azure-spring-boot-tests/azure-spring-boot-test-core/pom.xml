@@ -6,7 +6,7 @@
     <artifactId>azure-spring-boot-tests</artifactId>
     <groupId>com.microsoft.azure</groupId>
     <version>2.2.5-beta.1</version>
-    <relativePath>../azure-spring-boot-tests/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -22,22 +22,22 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-    <dependency>
-      <groupId>net.sourceforge.cobertura</groupId>
-      <artifactId>cobertura</artifactId>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>net.sourceforge.cobertura</groupId>-->
+<!--      <artifactId>cobertura</artifactId>-->
+<!--    </dependency>-->
     <!--<dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
     </dependency>-->
-    <dependency>
-      <groupId>com.jcraft</groupId>
-      <artifactId>jsch</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.cverges.expect4j</groupId>
-      <artifactId>expect4j</artifactId>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.jcraft</groupId>-->
+<!--      <artifactId>jsch</artifactId>-->
+<!--    </dependency>-->
+<!--    <dependency>-->
+<!--      <groupId>com.github.cverges.expect4j</groupId>-->
+<!--      <artifactId>expect4j</artifactId>-->
+<!--    </dependency>-->
   </dependencies>
 
 </project>
