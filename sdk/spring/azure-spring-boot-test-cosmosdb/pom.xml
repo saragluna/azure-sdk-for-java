@@ -6,7 +6,7 @@
     <artifactId>azure-spring-boot-tests</artifactId>
     <groupId>com.microsoft.azure</groupId>
     <version>2.2.5-beta.1</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../azure-spring-boot-tests/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
