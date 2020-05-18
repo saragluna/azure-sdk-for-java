@@ -15,8 +15,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-public class CosmosDBIT {
-    private static final Logger log = LoggerFactory.getLogger(CosmosDBIT.class);
+public class CosmosDBTest {
+    private static final Logger log = LoggerFactory.getLogger(CosmosDBTest.class);
     private static final String documentEndpoint = System.getenv("AZURE_COSMOSDB_ENDPOINT");
     private static final String accountKey = System.getenv("AZURE_COSMOSDB_ACCOUNT_KEY");
     private static final String databaseName = System.getenv("AZURE_COSMOSDB_DATABASE_NAME");
