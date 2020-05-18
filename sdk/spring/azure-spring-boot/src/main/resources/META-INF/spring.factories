@@ -4,4 +4,4 @@ com.microsoft.azure.spring.autoconfigure.cosmosdb.CosmosDbReactiveRepositoriesAu
 com.microsoft.azure.spring.autoconfigure.gremlin.GremlinAutoConfiguration,\
 com.microsoft.azure.spring.autoconfigure.gremlin.GremlinRepositoriesAutoConfiguration,\
 com.microsoft.azure.spring.autoconfigure.aad.AADAuthenticationFilterAutoConfiguration,\
-com.microsoft.azure.spring.autoconfigure.aad.AADOAuth2AutoConfigurationg
+com.microsoft.azure.spring.autoconfigure.aad.AADOAuth2AutoConfiguration
