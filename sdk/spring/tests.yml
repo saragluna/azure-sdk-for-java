@@ -1,0 +1,24 @@
+trigger: none
+
+jobs:
+    - template: ../../eng/pipelines/templates/jobs/archetype-sdk-tests.yml
+      parameters:
+          TimeoutInMinutes: 240
+          MaxParallel: 2
+          ServiceDirectory: spring
+          Artifacts:
+              - name: azure-spring-boot-tests
+                groupId: com.microsoft.azure
+                safeName: azurespringboot-tests
+              - name: azure-spring-boot-test-core
+                groupId: com.microsoft.azure
+                safeName: azurespringboottestcore
+              - name: azure-spring-boot-test-cosmosdb
+                groupId: com.microsoft.azure
+                safeName: azurespringboottestcosmosdb
+          EnvVars:
+              AZURE_TEST_MODE: LIVE
+              AZURE_COSMOSDB_DATABASE_NAME: $(AZURE_COSMOSDB_DATABASE_NAME)
+              AZURE_COSMOSDB_ENDPOINT: $(AZURE_COSMOSDB_ENDPOINT)
+              AZURE_COSMOSDB_ACCOUNT_KEY: $(AZURE_COSMOSDB_ACCOUNT_KEY)
+
