@@ -16,19 +16,20 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 public class CosmosDBTest {
-    private static final Logger log = LoggerFactory.getLogger(CosmosDBTest.class);
-    private static final String documentEndpoint = System.getenv("AZURE_COSMOSDB_ENDPOINT");
-    private static final String accountKey = System.getenv("AZURE_COSMOSDB_ACCOUNT_KEY");
-    private static final String databaseName = System.getenv("AZURE_COSMOSDB_DATABASE_NAME");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CosmosDBTest.class);
+    private static final String AZURE_COSMOSDB_ENDPOINT = System.getenv("AZURE_COSMOSDB_ENDPOINT");
+    private static final String AZURE_COSMOSDB_ACCOUNT_KEY = System.getenv("AZURE_COSMOSDB_ACCOUNT_KEY");
+    private static final String AZURE_COSMOSDB_DATABASE_NAME = System.getenv("AZURE_COSMOSDB_DATABASE_NAME");
 
     @Test(expected = NoSuchBeanDefinitionException.class)
     @Ignore
     public void testCosmosStarterIsolating() {
         try (AppRunner app = new AppRunner(DummyApp.class)) {
             //set properties
-            app.property("azure.cosmosdb.uri", documentEndpoint);
-            app.property("azure.cosmosdb.key", accountKey);
-            app.property("azure.cosmosdb.database", databaseName);
+            app.property("azure.cosmosdb.uri", AZURE_COSMOSDB_ENDPOINT);
+            app.property("azure.cosmosdb.key", AZURE_COSMOSDB_ACCOUNT_KEY);
+            app.property("azure.cosmosdb.database", AZURE_COSMOSDB_DATABASE_NAME);
             app.property("azure.cosmosdb.populateQueryMetrics", String.valueOf(true));
 
             //start app
@@ -41,9 +42,9 @@ public class CosmosDBTest {
     public void testCosmosOperation() {
         try (AppRunner app = new AppRunner(DummyApp.class)) {
             //set properties
-            app.property("azure.cosmosdb.uri", documentEndpoint);
-            app.property("azure.cosmosdb.key", accountKey);
-            app.property("azure.cosmosdb.database", databaseName);
+            app.property("azure.cosmosdb.uri", AZURE_COSMOSDB_ENDPOINT);
+            app.property("azure.cosmosdb.key", AZURE_COSMOSDB_ACCOUNT_KEY);
+            app.property("azure.cosmosdb.database", AZURE_COSMOSDB_DATABASE_NAME);
             app.property("azure.cosmosdb.populateQueryMetrics", String.valueOf(true));
 
             //start app
@@ -78,7 +79,7 @@ public class CosmosDBTest {
                 testUser.getFirstName(), result.getFirstName());
             Assert.assertEquals("query result lastName doesn't match!", testUser.getLastName(), result.getLastName());
 
-            log.info("findOne in User collection get result: {}", result.toString());
+            LOGGER.info("findOne in User collection get result: {}", result.toString());
         }
     }
 }

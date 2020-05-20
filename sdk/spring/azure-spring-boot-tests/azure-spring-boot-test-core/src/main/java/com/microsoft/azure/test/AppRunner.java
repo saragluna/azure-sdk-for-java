@@ -57,14 +57,14 @@ public class AppRunner implements AutoCloseable {
         return SocketUtils.findAvailableTcpPort();
     }
 
-    private String [] props() {
+    private String[] props() {
         final List<String> result = new ArrayList<>();
 
         for (final Map.Entry<String, String> entry: props.entrySet()) {
             result.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
         }
 
-        return result.toArray(new String [0]);
+        return result.toArray(new String[0]);
     }
 
     public void stop() {
