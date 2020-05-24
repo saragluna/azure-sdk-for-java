@@ -53,7 +53,9 @@ stages:
         - name: azure-data-gremlin-spring-boot-starter
           groupId: com.microsoft.azure
           safeName: azurespringbootstarterdatagremlin
-
+        - name: azure-keyvault-secrets-spring-boot-starter
+          groupId: com.microsoft.azure
+          safeName: azurespringbootstarterkeyvaultsecrets
 
 
 

@@ -14,6 +14,7 @@
     <module>azure-spring-boot-starter-active-directory</module>
     <module>azure-spring-boot-starter-cosmosdb</module>
     <module>azure-spring-boot-starter-data-gremlin</module>
+    <module>azure-spring-boot-starter-keyvault-secrets</module>
   </modules>
 
 </project>
