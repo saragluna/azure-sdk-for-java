@@ -1,8 +1,15 @@
 trigger: none
 
 jobs:
-  - template: ../../eng/pipelines/templates/jobs/archetype-sdk-tests.yml
+  - template: ../../eng/pipelines/templates/jobs/archetype-sdk-testsarchetype-sdk-tests.yml
     parameters:
+      Matrix:
+        Linux - Java 8 (AzureCloud):
+          OSVmImage: 'ubuntu-18.04'
+          JavaVersion: '1.8'
+          DisplayName: 'Linux - Java 8'
+          CloudType: AzureCloud
+          AZURE_TEST_HTTP_CLIENTS: netty
       ServiceDirectory: appconfiguration
       Artifacts:
         - name: azure-data-appconfiguration
