@@ -23,11 +23,6 @@
       <version>2.2.5-beta.1</version>
     </dependency>
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
@@ -46,7 +41,6 @@
               <includes>
                 <include>com.azure:*</include>
                 <include>com.microsoft.azure:*</include>
-                <include>org.projectlombok:lombok:[1.18.10]</include>
                 <include>org.springframework.boot:spring-boot-starter-web:[2.2.0.RELEASE]</include> <!-- {x-include-update;org.springframework.boot:spring-boot-starter-web;external_dependency} -->
               </includes>
             </bannedDependencies>
