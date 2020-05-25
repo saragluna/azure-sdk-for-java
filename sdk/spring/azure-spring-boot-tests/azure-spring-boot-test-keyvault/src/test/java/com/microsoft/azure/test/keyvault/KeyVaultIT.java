@@ -57,6 +57,9 @@ public class KeyVaultIT {
     public void keyVaultAsPropertySource() {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
+
+            LOGGER.info("--------------------->" + AZURE_KEYVAULT_ENDPOINT);
+            LOGGER.info(SPRING_CLIENT_ID);
             app.property("azure.keyvault.uri", AZURE_KEYVAULT_ENDPOINT);
             app.property("azure.keyvault.client-id", SPRING_CLIENT_ID);
             app.property("azure.keyvault.client-key", SPRING_CLIENT_SECRET);
