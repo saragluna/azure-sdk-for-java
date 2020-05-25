@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "String"
+    },
+    "tenantId": {
+      "type": "String"
+    },
+    "testApplicationOid": {
+      "type": "String"
+    },
+    "endpointSuffix": {
+      "defaultValue": "vault.azure.net",
+      "type": "String"
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "azureKeyVaultUrl": "[format('https://{0}.{1}/', parameters('baseName'), parameters('endpointSuffix'))]",
+    "secretName": "spring-cosmos-db-key",
+    "secretValue": "rock"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2016-10-01",
+      "name": "[parameters('baseName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": [
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[parameters('testApplicationOid')]",
+            "permissions": {
+              "secrets": [
+                "backup",
+                "delete",
+                "get",
+                "list",
+                "purge",
+                "recover",
+                "restore",
+                "set"
+              ]
+            }
+          }
+        ],
+        "enabledForDeployment": false,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": false,
+        "enableSoftDelete": true
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('baseName'), '/', variables('secretName'))]",
+      "apiVersion": "2018-02-14",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('baseName'))]"
+      ],
+      "properties": {
+        "value": "[variables('secretValue')]"
+      }
+    }
+  ],
+  "outputs": {
+    "AZURE_KEYVAULT_ENDPOINT": {
+      "type": "string",
+      "value": "[variables('azureKeyVaultUrl')]"
+    },
+    "KEY_VAULT_SECRET_NAME": {
+      "type": "string",
+      "value": "[variables('secretName')]"
+    },
+    "KEY_VAULT_SECRET_VALUE": {
+      "type": "string",
+      "value": "[variables('secretValue')]"
+    }
+  }
+}

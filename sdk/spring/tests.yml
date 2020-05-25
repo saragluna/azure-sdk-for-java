@@ -14,7 +14,14 @@ jobs:
             CloudType: AzureCloud
             AZURE_TEST_HTTP_CLIENTS: netty
         TestStepMavenInputs:
+          options: '-Dmaven.wagon.http.pool=false $(DefaultOptions) -pl $(ProjectList)'
+          mavenOptions: '$(MemoryOptions) $(LoggingOptions)'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '$(JavaVersion)'
+          jdkArchitectureOption: 'x64'
+          publishJUnitResults: false
           goals: "verify"
+
         Artifacts:
           - name: azure-spring-boot-tests
             groupId: com.microsoft.azure
@@ -28,6 +35,9 @@ jobs:
           - name: azure-spring-boot-test-aad
             groupId: com.microsoft.azure
             safeName: azurespringboottestaad
+          - name: azure-spring-boot-test-keyvault
+            groupId: com.microsoft.azure
+            safeName: azurespringboottestkeyvault
         EnvVars:
           AZURE_TEST_MODE: LIVE
 #              AZURE_COSMOSDB_DATABASE_NAME: $(AZURE_COSMOSDB_DATABASE_NAME)

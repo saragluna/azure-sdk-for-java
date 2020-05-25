@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-public class CosmosDBTest {
+public class CosmosDBIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CosmosDBTest.class);
     private static final String AZURE_COSMOSDB_ENDPOINT = System.getenv("AZURE_COSMOSDB_ENDPOINT");
@@ -34,7 +34,7 @@ public class CosmosDBTest {
 
             //start app
             app.start();
-//            app.getBean(AADAuthenticationFilterAutoConfiguration.class);
+            app.getBean(AADAuthenticationFilterAutoConfiguration.class);
         }
     }
 

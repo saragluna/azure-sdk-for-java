@@ -3,91 +3,64 @@
 
 package com.microsoft.azure.test.keyvault;
 
-import com.microsoft.azure.management.appservice.WebApp;
-import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.keyvault.Vault;
-import com.microsoft.azure.management.resources.fluentcore.utils.SdkContext;
-import com.microsoft.azure.mgmt.AppServiceTool;
-import com.microsoft.azure.mgmt.ClientSecretAccess;
-import com.microsoft.azure.mgmt.ConstantsHelper;
-import com.microsoft.azure.mgmt.KeyVaultTool;
-import com.microsoft.azure.mgmt.ResourceGroupTool;
-import com.microsoft.azure.mgmt.VirtualMachineTool;
 import com.microsoft.azure.test.AppRunner;
-import com.microsoft.azure.utils.SSHShell;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
-@Slf4j
 public class KeyVaultIT {
 
-    private static ClientSecretAccess access;
-    private static Vault vault;
-    private static String resourceGroupName;
-    private static RestTemplate restTemplate;
-    private static final String prefix = "test-keyvault";
-    private static final String VM_USER_NAME = "deploy";
-    private static final String VM_USER_PASSWORD = "12NewPAwX0rd!";
-    private static final String KEY_VAULT_VALUE = "value";
-    private static final String TEST_KEY_VAULT_JAR_FILE_NAME = "app.jar";
-    private static final int DEFAULT_MAX_RETRY_TIMES = 3;
-    private static String TEST_KEYVAULT_APP_JAR_PATH;
-    private static String TEST_KEYVAULT_APP_ZIP_PATH;
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyVaultIT.class);
+    private static final String AZURE_KEYVAULT_ENDPOINT = System.getenv("AZURE_KEYVAULT_ENDPOINT");
+    private static final String SPRING_CLIENT_ID = System.getenv("SPRING_CLIENT_ID");
+    private static final String SPRING_CLIENT_SECRET = System.getenv("SPRING_CLIENT_SECRET");
+    private static final String SPRING_TENANT_ID = System.getenv("SPRING_TENANT_ID");
+    private static final String KEY_VAULT_SECRET_VALUE = System.getenv("KEY_VAULT_SECRET_VALUE");
+    private static final String KEY_VAULT_SECRET_NAME = System.getenv("KEY_VAULT_SECRET_NAME");
 
-    @BeforeClass
-    public static void createKeyVault() throws IOException {
-        access = ClientSecretAccess.load();
-        resourceGroupName = SdkContext.randomResourceName(ConstantsHelper.TEST_RESOURCE_GROUP_NAME_PREFIX, 30);
-        final KeyVaultTool tool = new KeyVaultTool(access);
-        vault = tool.createVaultInNewGroup(resourceGroupName, prefix);
-        vault.secrets().define("key").withValue(KEY_VAULT_VALUE).create();
-        vault.secrets().define("azure-cosmosdb-key").withValue(KEY_VAULT_VALUE).create();
-        restTemplate = new RestTemplate();
+//    private static RestTemplate restTemplate;
+//    private static final String prefix = "test-keyvault";
+//    private static final String VM_USER_NAME = "deploy";
+//    private static final String VM_USER_PASSWORD = "12NewPAwX0rd!";
+//    private static final String KEY_VAULT_VALUE = "value";
+//    private static final String TEST_KEY_VAULT_JAR_FILE_NAME = "app.jar";
+//    private static final int DEFAULT_MAX_RETRY_TIMES = 3;
+//    private static String TEST_KEYVAULT_APP_JAR_PATH;
+//    private static String TEST_KEYVAULT_APP_ZIP_PATH;
 
-        TEST_KEYVAULT_APP_JAR_PATH = new File(System.getProperty("keyvault.app.jar.path")).getCanonicalPath();
-        TEST_KEYVAULT_APP_ZIP_PATH = new File(System.getProperty("keyvault.app.zip.path")).getCanonicalPath();
-        log.info("keyvault.app.jar.path={}", TEST_KEYVAULT_APP_JAR_PATH);
-        log.info("keyvault.app.zip.path={}", TEST_KEYVAULT_APP_ZIP_PATH);
-        log.info("--------------------->resources provision over");
-    }
+//    @BeforeClass
+//    public static void createKeyVault() throws IOException {
+//        restTemplate = new RestTemplate();
+//
+//        TEST_KEYVAULT_APP_JAR_PATH = new File(System.getProperty("keyvault.app.jar.path")).getCanonicalPath();
+//        TEST_KEYVAULT_APP_ZIP_PATH = new File(System.getProperty("keyvault.app.zip.path")).getCanonicalPath();
+//        log.info("keyvault.app.jar.path={}", TEST_KEYVAULT_APP_JAR_PATH);
+//        log.info("keyvault.app.zip.path={}", TEST_KEYVAULT_APP_ZIP_PATH);
+//        log.info("--------------------->resources provision over");
+//    }
 
-    @AfterClass
-    public static void deleteResourceGroup() {
-        final ResourceGroupTool tool = new ResourceGroupTool(access);
-        tool.deleteGroup(resourceGroupName);
-        log.info("--------------------->resources clean over");
-    }
+//    @AfterClass
+//    public static void deleteResourceGroup() {
+//        final ResourceGroupTool tool = new ResourceGroupTool(access);
+//        tool.deleteGroup(resourceGroupName);
+//        log.info("--------------------->resources clean over");
+//    }
 
     @Test
     public void keyVaultAsPropertySource() {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
-            app.property("azure.keyvault.uri", vault.vaultUri());
-            app.property("azure.keyvault.client-id", access.clientId());
-            app.property("azure.keyvault.client-key", access.clientSecret());
-            app.property("azure.keyvault.tenant-id", access.tenant());
+            app.property("azure.keyvault.uri", AZURE_KEYVAULT_ENDPOINT);
+            app.property("azure.keyvault.client-id", SPRING_CLIENT_ID);
+            app.property("azure.keyvault.client-key", SPRING_CLIENT_SECRET);
+            app.property("azure.keyvault.tenant-id", SPRING_TENANT_ID);
 
             final ConfigurableApplicationContext dummy = app.start("dummy");
             final ConfigurableEnvironment environment = dummy.getEnvironment();
@@ -97,9 +70,8 @@ public class KeyVaultIT {
                         .getSource().getClass() + "\n");
             }
 
-            assertEquals(KEY_VAULT_VALUE, app.getProperty("key"));
-            app.close();
-            log.info("--------------------->test over");
+            assertEquals(KEY_VAULT_SECRET_VALUE, app.getProperty(KEY_VAULT_SECRET_NAME));
+            LOGGER.info("--------------------->test over");
         }
     }
 
@@ -107,21 +79,20 @@ public class KeyVaultIT {
     public void keyVaultAsPropertySourceWithSpecificKeys() {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
-            app.property("azure.keyvault.uri", vault.vaultUri());
-            app.property("azure.keyvault.client-id", access.clientId());
-            app.property("azure.keyvault.client-key", access.clientSecret());
-            app.property("azure.keyvault.tenant-id", access.tenant());
-            app.property("azure.keyvault.secret.keys", "key , azure-cosmosdb-key");
+            app.property("azure.keyvault.uri", AZURE_KEYVAULT_ENDPOINT);
+            app.property("azure.keyvault.client-id", SPRING_CLIENT_ID);
+            app.property("azure.keyvault.client-key", SPRING_CLIENT_SECRET);
+            app.property("azure.keyvault.tenant-id", SPRING_TENANT_ID);
+            app.property("azure.keyvault.secret.keys", KEY_VAULT_SECRET_NAME + " , azure-cosmosdb-key");
 
             app.start();
-            assertEquals(KEY_VAULT_VALUE, app.getProperty("key"));
-            app.close();
-            log.info("--------------------->test over");
+            assertEquals(KEY_VAULT_SECRET_VALUE, app.getProperty("key"));
+            LOGGER.info("--------------------->test over");
         }
     }
 
-    @Test
-    public void keyVaultWithAppServiceMSI() {
+//    @Test
+   /* public void keyVaultWithAppServiceMSI() {
         final AppServiceTool appServiceTool = new AppServiceTool(access);
 
         final Map<String, String> appSettings = new HashMap<>();
@@ -162,7 +133,7 @@ public class KeyVaultIT {
         final ResponseEntity<String> response = curlWithRetry(resourceUrl, 3, 120_000, String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(KEY_VAULT_VALUE, response.getBody());
+        assertEquals(KEY_VAULT_SECRET_VALUE, response.getBody());
         log.info("--------------------->test app service with MSI over");
     }
 
@@ -210,7 +181,7 @@ public class KeyVaultIT {
                 String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(KEY_VAULT_VALUE, response.getBody());
+        assertEquals(KEY_VAULT_SECRET_VALUE, response.getBody());
         log.info("key vault value is: {}", response.getBody());
         log.info("--------------------->test virtual machine with MSI over");
     }
@@ -237,7 +208,7 @@ public class KeyVaultIT {
             httpStatus = response.getStatusCode();
         }
         return response;
-    }
+    }*/
 
     @SpringBootApplication
     public static class DumbApp {}
