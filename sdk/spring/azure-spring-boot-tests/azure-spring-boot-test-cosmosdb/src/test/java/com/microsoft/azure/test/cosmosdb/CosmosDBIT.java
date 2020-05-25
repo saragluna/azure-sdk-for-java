@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.test.cosmosdb;
 
+import com.microsoft.azure.spring.autoconfigure.aad.AADAuthenticationFilterAutoConfiguration;
 import com.microsoft.azure.test.AppRunner;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 public class CosmosDBIT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CosmosDBTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CosmosDBIT.class);
     private static final String AZURE_COSMOSDB_ENDPOINT = System.getenv("AZURE_COSMOSDB_ENDPOINT");
     private static final String AZURE_COSMOSDB_ACCOUNT_KEY = System.getenv("AZURE_COSMOSDB_ACCOUNT_KEY");
     private static final String AZURE_COSMOSDB_DATABASE_NAME = System.getenv("AZURE_COSMOSDB_DATABASE_NAME");
