@@ -59,6 +59,7 @@ public class KeyVaultIT {
             app.property("azure.keyvault.enabled", "true");
 
             LOGGER.info("--------------------->" + AZURE_KEYVAULT_ENDPOINT);
+            LOGGER.info("--------------------->" + AZURE_KEYVAULT_ENDPOINT.equals("***"));
             LOGGER.info(SPRING_CLIENT_ID);
             app.property("azure.keyvault.uri", AZURE_KEYVAULT_ENDPOINT);
             app.property("azure.keyvault.client-id", SPRING_CLIENT_ID);
@@ -89,7 +90,7 @@ public class KeyVaultIT {
             app.property("azure.keyvault.secret.keys", KEY_VAULT_SECRET_NAME + " , azure-cosmosdb-key");
 
             app.start();
-            assertEquals(KEY_VAULT_SECRET_VALUE, app.getProperty("key"));
+            assertEquals(KEY_VAULT_SECRET_VALUE, app.getProperty(KEY_VAULT_SECRET_NAME));
             LOGGER.info("--------------------->test over");
         }
     }
