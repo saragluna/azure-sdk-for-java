@@ -1,16 +1,15 @@
-/**
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See LICENSE in the project root for
- * license information.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.azure.test.keyvault.group;
 
 import com.microsoft.azure.spring.autoconfigure.aad.AADAuthenticationFilter;
 import com.microsoft.azure.test.AppRunner;
 import com.microsoft.azure.test.oauth.OAuthResponse;
 import com.microsoft.azure.test.oauth.OAuthUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
@@ -44,10 +43,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.springframework.http.HttpHeaders.COOKIE;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
-@Slf4j
 public class AADAuthenticationFilterIT {
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private static final Logger LOGGER = LoggerFactory.getLogger(AADAuthenticationFilterIT.class);
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Test
     public void testAADAuthenticationFilterWithSingleTenantApp() {
@@ -88,7 +87,7 @@ public class AADAuthenticationFilterIT {
 
             final HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", String.format("Bearer %s", idToken));
-            HttpEntity entity = new HttpEntity(headers);
+            HttpEntity<Object> entity = new HttpEntity<>(headers);
 
             final ResponseEntity<String> response2 = restTemplate.exchange(app.root() + "api/all",
                     HttpMethod.GET, entity, String.class, new HashMap<>());
@@ -100,7 +99,7 @@ public class AADAuthenticationFilterIT {
 
             if (sessionCookie.isPresent()) {
                 headers.add(COOKIE, sessionCookie.get());
-                entity = new HttpEntity(headers);
+                entity = new HttpEntity<>(headers);
             }
 
             final ResponseEntity<String> response3 = restTemplate.exchange(app.root() + "api/group1",
@@ -116,7 +115,7 @@ public class AADAuthenticationFilterIT {
             }
 
             app.close();
-            log.info("--------------------->test over");
+            LOGGER.info("--------------------->test over");
         }
     }
 

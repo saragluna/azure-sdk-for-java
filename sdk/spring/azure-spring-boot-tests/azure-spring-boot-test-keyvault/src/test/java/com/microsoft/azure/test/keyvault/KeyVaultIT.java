@@ -1,8 +1,6 @@
-/**
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See LICENSE in the project root for
- * license information.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.azure.test.keyvault;
 
 import com.microsoft.azure.management.appservice.WebApp;
@@ -44,7 +42,7 @@ import static org.junit.Assert.assertEquals;
 
 @Slf4j
 public class KeyVaultIT {
-  
+
     private static ClientSecretAccess access;
     private static Vault vault;
     private static String resourceGroupName;
@@ -74,7 +72,7 @@ public class KeyVaultIT {
         log.info("keyvault.app.zip.path={}", TEST_KEYVAULT_APP_ZIP_PATH);
         log.info("--------------------->resources provision over");
     }
-    
+
     @AfterClass
     public static void deleteResourceGroup() {
         final ResourceGroupTool tool = new ResourceGroupTool(access);

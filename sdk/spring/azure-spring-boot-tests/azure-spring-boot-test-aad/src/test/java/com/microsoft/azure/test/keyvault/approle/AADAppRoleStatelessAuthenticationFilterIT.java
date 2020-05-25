@@ -1,17 +1,16 @@
-/**
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See LICENSE in the project root for
- * license information.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.azure.test.keyvault.approle;
 
 import com.microsoft.azure.spring.autoconfigure.aad.AADAppRoleStatelessAuthenticationFilter;
 import com.microsoft.azure.test.AppRunner;
 import com.microsoft.azure.test.oauth.OAuthResponse;
 import com.microsoft.azure.test.oauth.OAuthUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
@@ -37,10 +36,9 @@ import static com.microsoft.azure.test.oauth.OAuthUtils.AAD_CLIENT_SECRET;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@Slf4j
 public class AADAppRoleStatelessAuthenticationFilterIT {
-
-    private RestTemplate restTemplate = new RestTemplate();
+    private static final Logger log = LoggerFactory.getLogger(AADAppRoleStatelessAuthenticationFilterIT.class);
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Test
     @Ignore
@@ -70,7 +68,7 @@ public class AADAppRoleStatelessAuthenticationFilterIT {
 
             final HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", String.format("Bearer %s", authResponse.getIdToken()));
-            final HttpEntity entity = new HttpEntity(headers);
+            final HttpEntity<Object> entity = new HttpEntity<>(headers);
 
             final ResponseEntity<String> response2 = restTemplate.exchange(app.root() + "authorized",
                     HttpMethod.GET, entity, String.class, new HashMap<>());
