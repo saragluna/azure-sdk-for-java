@@ -13,21 +13,21 @@ jobs:
             DisplayName: 'Linux - Java 8'
             CloudType: AzureCloud
             AZURE_TEST_HTTP_CLIENTS: netty
-          Artifacts:
-              - name: azure-spring-boot-tests
-                groupId: com.microsoft.azure
-                safeName: azurespringboot-tests
-              - name: azure-spring-boot-test-core
-                groupId: com.microsoft.azure
-                safeName: azurespringboottestcore
-#              - name: azure-spring-boot-test-cosmosdb
-#                groupId: com.microsoft.azure
-#                safeName: azurespringboottestcosmosdb
-              - name: azure-spring-boot-test-aad
-                groupId: com.microsoft.azure
-                safeName: azurespringboottestaad
-          EnvVars:
-              AZURE_TEST_MODE: LIVE
+        Artifacts:
+          - name: azure-spring-boot-tests
+            groupId: com.microsoft.azure
+            safeName: azurespringboot-tests
+          - name: azure-spring-boot-test-core
+            groupId: com.microsoft.azure
+            safeName: azurespringboottestcore
+#         - name: azure-spring-boot-test-cosmosdb
+#           groupId: com.microsoft.azure
+#           safeName: azurespringboottestcosmosdb
+          - name: azure-spring-boot-test-aad
+            groupId: com.microsoft.azure
+            safeName: azurespringboottestaad
+        EnvVars:
+          AZURE_TEST_MODE: LIVE
 #              AZURE_COSMOSDB_DATABASE_NAME: $(AZURE_COSMOSDB_DATABASE_NAME)
 #              AZURE_COSMOSDB_ENDPOINT: $(AZURE_COSMOSDB_ENDPOINT)
 #              AZURE_COSMOSDB_ACCOUNT_KEY: $(AZURE_COSMOSDB_ACCOUNT_KEY)
