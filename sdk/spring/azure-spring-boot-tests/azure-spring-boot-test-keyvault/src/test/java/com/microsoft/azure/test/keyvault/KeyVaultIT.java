@@ -211,5 +211,7 @@ public class KeyVaultIT {
     }*/
 
     @SpringBootApplication
-    public static class DumbApp {}
+    public static class DumbApp {
+
+    }
 }

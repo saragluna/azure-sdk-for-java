@@ -21,7 +21,7 @@ public class OAuthUtils {
     private static final String AAD_USER_NAME = "AAD_USER_NAME";
     private static final String AAD_USER_PASSWORD = "AAD_USER_PASSWORD";
 
-    private static final RestTemplate client = new RestTemplate();
+    private static final RestTemplate CLIENT = new RestTemplate();
 
     public static OAuthResponse executeOAuth2ROPCFlow(String aadClientId, String aadClientSecret) {
         final String tenantId = System.getenv().get(AAD_TENANT_ID);
@@ -48,7 +48,7 @@ public class OAuthUtils {
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        return client.postForObject(url, requestEntity, OAuthResponse.class);
+        return CLIENT.postForObject(url, requestEntity, OAuthResponse.class);
     }
 
     private static void assertNotEmpty(String text, String key) {

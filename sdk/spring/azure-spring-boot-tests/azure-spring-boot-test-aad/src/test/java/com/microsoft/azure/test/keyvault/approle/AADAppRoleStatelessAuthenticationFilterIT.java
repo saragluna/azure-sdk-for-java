@@ -37,7 +37,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class AADAppRoleStatelessAuthenticationFilterIT {
-    private static final Logger log = LoggerFactory.getLogger(AADAppRoleStatelessAuthenticationFilterIT.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AADAppRoleStatelessAuthenticationFilterIT.class);
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Test
@@ -80,7 +81,7 @@ public class AADAppRoleStatelessAuthenticationFilterIT {
             assertEquals(HttpStatus.OK, response3.getStatusCode());
             assertEquals("admin endpoint response", response3.getBody());
 
-            log.info("--------------------->test over");
+            LOGGER.info("--------------------->test over");
         }
     }
 

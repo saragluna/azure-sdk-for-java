@@ -14,7 +14,7 @@ jobs:
             CloudType: AzureCloud
             AZURE_TEST_HTTP_CLIENTS: netty
         TestStepMavenInputs:
-          options: '-Dmaven.wagon.http.pool=false $(DefaultOptions) -pl $(ProjectList)'
+          options: '-Dmaven.wagon.http.pool=false $(DefaultOptions) -Dmaven.javadoc.skip=true -Drevapi.skip=true -pl $(ProjectList)'
           mavenOptions: '$(MemoryOptions) $(LoggingOptions)'
           javaHomeOption: 'JDKVersion'
           jdkVersionOption: '$(JavaVersion)'
