@@ -15,11 +15,6 @@ jobs:
             AZURE_TEST_HTTP_CLIENTS: netty
         TestStepMavenInputs:
           options: '-Dmaven.wagon.http.pool=false $(DefaultOptions) -Dmaven.javadoc.skip=true -Drevapi.skip=true -pl $(ProjectList)'
-          mavenOptions: '$(MemoryOptions) $(LoggingOptions)'
-          javaHomeOption: 'JDKVersion'
-          jdkVersionOption: '$(JavaVersion)'
-          jdkArchitectureOption: 'x64'
-          publishJUnitResults: false
           goals: "verify"
 
         Artifacts:
