@@ -80,7 +80,6 @@ public class AADAppRoleStatelessAuthenticationFilterIT {
             assertEquals(HttpStatus.OK, response3.getStatusCode());
             assertEquals("admin endpoint response", response3.getBody());
 
-            app.close();
             log.info("--------------------->test over");
         }
     }

@@ -114,7 +114,6 @@ public class AADAuthenticationFilterIT {
                 assertEquals(HttpClientErrorException.Forbidden.class, e.getClass());
             }
 
-            app.close();
             LOGGER.info("--------------------->test over");
         }
     }
