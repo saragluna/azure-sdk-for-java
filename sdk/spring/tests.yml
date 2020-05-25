@@ -13,6 +13,8 @@ jobs:
             DisplayName: 'Linux - Java 8'
             CloudType: AzureCloud
             AZURE_TEST_HTTP_CLIENTS: netty
+        TestStepMavenInputs:
+          goals: "verify"
         Artifacts:
           - name: azure-spring-boot-tests
             groupId: com.microsoft.azure
