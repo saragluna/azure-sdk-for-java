@@ -20,14 +20,20 @@
     "location": "[resourceGroup().location]",
     "azureKeyVaultUrl": "[format('https://{0}.{1}/', parameters('baseName'), parameters('endpointSuffix'))]",
     "secretName": "spring-cosmos-db-key",
-    "secretValue": "rock"
+    "secretValue": "rock",
+    "keyVaultName": "[parameters('baseName')]",
+    "appServicePlanName": "[concat(parameters('baseName'), '-plan')]",
+    "appServiceName": "[concat(parameters('baseName'), '-app')]"
   },
   "resources": [
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2016-10-01",
-      "name": "[parameters('baseName')]",
-      "location": "[resourceGroup().location]",
+      "name": "[variables('keyVaultName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('appServiceName'))]"
+      ],
       "properties": {
         "sku": {
           "family": "A",
@@ -39,16 +45,14 @@
             "tenantId": "[parameters('tenantId')]",
             "objectId": "[parameters('testApplicationOid')]",
             "permissions": {
-              "secrets": [
-                "backup",
-                "delete",
-                "get",
-                "list",
-                "purge",
-                "recover",
-                "restore",
-                "set"
-              ]
+              "secrets": [ "get", "list" ]
+            }
+          },
+          {
+            "tenantId": "[reference(concat('Microsoft.Web/sites/',  variables('appServiceName'), '/providers/Microsoft.ManagedIdentity/Identities/default')).tenantId]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/',  variables('appServiceName'), '/providers/Microsoft.ManagedIdentity/Identities/default')).principalId]",
+            "permissions": {
+                "secrets": [ "get", "list" ]
             }
           }
         ],
@@ -60,14 +64,60 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "name": "[concat(parameters('baseName'), '/', variables('secretName'))]",
+      "name": "[concat(variables('keyVaultName'), '/', variables('secretName'))]",
       "apiVersion": "2018-02-14",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('baseName'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ],
       "properties": {
         "value": "[variables('secretValue')]"
+      }
+    },
+    {
+      "apiVersion": "2018-11-01",
+      "name": "[variables('appServicePlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[variables('location')]",
+      "kind": "linux",
+      "tags": null,
+      "properties": {
+          "name": "[variables('appServicePlanName')]",
+          "workerSize": "0",
+          "workerSizeId": "0",
+          "numberOfWorkers": "1",
+          "reserved": true
+      },
+      "sku": {
+          "Tier": "Basic",
+          "Name": "B1"
+      }
+    },
+    {
+      "apiVersion": "2018-11-01",
+      "name": "[variables('appServiceName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ],
+      "properties": {
+        "name": "[variables('appServiceName')]",
+        "siteConfig": {
+            "appSettings": [
+              {
+                "name": "AZURE_KEYVAULT_URI",
+                "value": "[variables('azureKeyVaultUrl')]"
+              }
+            ],
+            "linuxFxVersion": "JAVA|8-jre8",
+            "alwaysOn": false
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "clientAffinityEnabled": false,
+        "identity": {
+          "type": "SystemAssigned"
+        }
       }
     }
   ],
@@ -83,6 +133,10 @@
     "KEY_VAULT_SECRET_VALUE": {
       "type": "string",
       "value": "[variables('secretValue')]"
+    },
+    "APP_SERVICE_NAME": {
+      "type": "string",
+      "value": "[variables('appServiceName')]"
     }
   }
 }

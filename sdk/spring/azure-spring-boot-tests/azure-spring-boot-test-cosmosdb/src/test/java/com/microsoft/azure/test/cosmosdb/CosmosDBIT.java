@@ -4,7 +4,7 @@
 package com.microsoft.azure.test.cosmosdb;
 
 import com.microsoft.azure.spring.autoconfigure.aad.AADAuthenticationFilterAutoConfiguration;
-import com.microsoft.azure.test.AppRunner;
+import com.microsoft.azure.test.utils.AppRunner;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

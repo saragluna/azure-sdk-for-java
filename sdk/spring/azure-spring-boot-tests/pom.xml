@@ -25,7 +25,6 @@
     <module>azure-spring-boot-test-aad</module>
     <module>azure-spring-boot-test-cosmosdb</module>
     <module>azure-spring-boot-test-keyvault</module>
-    <!--    <module>azure-spring-boot-test-application</module>-->
   </modules>
 
   <properties>
@@ -84,13 +83,8 @@
       </dependency>
 
       <!--  Azure Management  -->
-<!--      <dependency>-->
-<!--        <groupId>com.microsoft.azure</groupId>-->
-<!--        <artifactId>azure</artifactId>-->
-<!--        <version>${azure.mgmt.version}</version>-->
-<!--      </dependency>-->
 
-<!--      <dependency>-->
+      <!--      <dependency>-->
 <!--        <groupId>commons-net</groupId>-->
 <!--        <artifactId>commons-net</artifactId>-->
 <!--        <version>${commons.net.version}</version>-->

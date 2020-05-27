@@ -3,7 +3,12 @@
 
 package com.microsoft.azure.test.keyvault;
 
-import com.microsoft.azure.test.AppRunner;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.appservice.WebApp;
+import com.microsoft.azure.management.resources.fluentcore.utils.SdkContext;
+import com.microsoft.azure.test.mgmt.ClientSecretAccess;
+import com.microsoft.azure.test.utils.AppRunner;
+import com.microsoft.azure.test.utils.MavenBasedProject;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +17,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.File;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,19 +30,23 @@ public class KeyVaultIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyVaultIT.class);
     private static final String AZURE_KEYVAULT_ENDPOINT = System.getenv("AZURE_KEYVAULT_ENDPOINT");
-    private static final String SPRING_CLIENT_ID = System.getenv("SPRING_CLIENT_ID");
-    private static final String SPRING_CLIENT_SECRET = System.getenv("SPRING_CLIENT_SECRET");
-    private static final String SPRING_TENANT_ID = System.getenv("SPRING_TENANT_ID");
     private static final String KEY_VAULT_SECRET_VALUE = System.getenv("KEY_VAULT_SECRET_VALUE");
     private static final String KEY_VAULT_SECRET_NAME = System.getenv("KEY_VAULT_SECRET_NAME");
+    private static final String SPRING_RESOURCE_GROUP = System.getenv("SPRING_RESOURCE_GROUP");
+    private static final String APP_SERVICE_NAME = System.getenv("APP_SERVICE_NAME");
+    private static final String TEST_APPLICATION_PATH_PREFIX = "sdk/spring/azure-spring-boot-tests/";
+    private static final int DEFAULT_MAX_RETRY_TIMES = 3;
 
-//    private static RestTemplate restTemplate;
+    private final ClientSecretAccess clientSecretAccess = ClientSecretAccess.load();
+
+
+
+    private static RestTemplate restTemplate = new RestTemplate();
 //    private static final String prefix = "test-keyvault";
 //    private static final String VM_USER_NAME = "deploy";
 //    private static final String VM_USER_PASSWORD = "12NewPAwX0rd!";
 //    private static final String KEY_VAULT_VALUE = "value";
 //    private static final String TEST_KEY_VAULT_JAR_FILE_NAME = "app.jar";
-//    private static final int DEFAULT_MAX_RETRY_TIMES = 3;
 //    private static String TEST_KEYVAULT_APP_JAR_PATH;
 //    private static String TEST_KEYVAULT_APP_ZIP_PATH;
 
@@ -58,9 +73,9 @@ public class KeyVaultIT {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
             app.property("azure.keyvault.uri", AZURE_KEYVAULT_ENDPOINT);
-            app.property("azure.keyvault.client-id", SPRING_CLIENT_ID);
-            app.property("azure.keyvault.client-key", SPRING_CLIENT_SECRET);
-            app.property("azure.keyvault.tenant-id", SPRING_TENANT_ID);
+            app.property("azure.keyvault.client-id", clientSecretAccess.clientId());
+            app.property("azure.keyvault.client-key", clientSecretAccess.clientSecret());
+            app.property("azure.keyvault.tenant-id", clientSecretAccess.tenantId());
 
             final ConfigurableApplicationContext dummy = app.start("dummy");
             final ConfigurableEnvironment environment = dummy.getEnvironment();
@@ -80,9 +95,9 @@ public class KeyVaultIT {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
             app.property("azure.keyvault.uri", AZURE_KEYVAULT_ENDPOINT);
-            app.property("azure.keyvault.client-id", SPRING_CLIENT_ID);
-            app.property("azure.keyvault.client-key", SPRING_CLIENT_SECRET);
-            app.property("azure.keyvault.tenant-id", SPRING_TENANT_ID);
+            app.property("azure.keyvault.client-id", clientSecretAccess.clientId());
+            app.property("azure.keyvault.client-key", clientSecretAccess.clientSecret());
+            app.property("azure.keyvault.tenant-id", clientSecretAccess.tenantId());
             app.property("azure.keyvault.secret.keys", KEY_VAULT_SECRET_NAME + " , azure-cosmosdb-key");
             LOGGER.info("====" + KEY_VAULT_SECRET_NAME + " , azure-cosmosdb-key");
 
@@ -92,53 +107,50 @@ public class KeyVaultIT {
         }
     }
 
-//    @Test
-   /* public void keyVaultWithAppServiceMSI() {
-        final AppServiceTool appServiceTool = new AppServiceTool(access);
+    @Test
+    public void keyVaultWithAppServiceMSI() {
+        final WebApp webApp = Azure
+            .authenticate(clientSecretAccess.credentials())
+            .withSubscription(clientSecretAccess.subscription())
+            .webApps()
+            .getByResourceGroup(SPRING_RESOURCE_GROUP, APP_SERVICE_NAME);
 
-        final Map<String, String> appSettings = new HashMap<>();
-        appSettings.put("AZURE_KEYVAULT_URI", vault.vaultUri());
 
-        final WebApp appService = appServiceTool.createAppService(resourceGroupName, prefix, appSettings);
-
-        // Grant System Assigned MSI access to key vault
-        KeyVaultTool.grantSystemAssignedMSIAccessToKeyVault(vault,
-                appService.systemAssignedManagedServiceIdentityPrincipalId());
+        final MavenBasedProject app = new MavenBasedProject(TEST_APPLICATION_PATH_PREFIX + "azure-spring-boot-test-application");
+        app.assembly();
 
         // Deploy zip
         // Add retry logic here to avoid Kudu's socket timeout issue.
         // More details: https://github.com/Microsoft/azure-maven-plugins/issues/339
         int retryCount = 0;
-        final File zipFile = new File(TEST_KEYVAULT_APP_ZIP_PATH);
+        final File zipFile = new File(app.zipFile());
         while (retryCount < DEFAULT_MAX_RETRY_TIMES) {
             retryCount += 1;
             try {
-                appService.zipDeploy(zipFile);
-                log.info(String.format("Successfully deployed the artifact to https://%s",
-                        appService.defaultHostName()));
+                webApp.zipDeploy(zipFile);
+                LOGGER.info(String.format("Deployed the artifact to https://%s", webApp.defaultHostName()));
                 break;
             } catch (Exception e) {
-                log.debug(
-                        String.format("Exception occurred when deploying the zip package: %s, " +
-                                "retrying immediately (%d/%d)", e.getMessage(), retryCount, DEFAULT_MAX_RETRY_TIMES));
+                LOGGER.debug(String.format("Exception occurred when deploying the zip package: %s, "
+                    + "retrying immediately (%d/%d)", e.getMessage(), retryCount, DEFAULT_MAX_RETRY_TIMES));
             }
         }
 
         // Restart App Service
-        log.info("restarting app service...");
-        appService.restart();
-        log.info("restarting app service finished...");
+        LOGGER.info("restarting app service...");
+        webApp.restart();
+        LOGGER.info("restarting app service finished...");
 
-        final String resourceUrl = "https://" + appService.name() + ".azurewebsites.net" + "/get";
+        final String resourceUrl = "https://" + webApp.name() + ".azurewebsites.net" + "/get";
         // warm up
         final ResponseEntity<String> response = curlWithRetry(resourceUrl, 3, 120_000, String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(KEY_VAULT_SECRET_VALUE, response.getBody());
-        log.info("--------------------->test app service with MSI over");
+        LOGGER.info("--------------------->test app service with MSI over");
     }
 
-    @Test
+    /*@Test
     public void keyVaultWithVirtualMachineMSI() throws Exception {
         final VirtualMachineTool vmTool = new VirtualMachineTool(access);
 
@@ -185,7 +197,7 @@ public class KeyVaultIT {
         assertEquals(KEY_VAULT_SECRET_VALUE, response.getBody());
         log.info("key vault value is: {}", response.getBody());
         log.info("--------------------->test virtual machine with MSI over");
-    }
+    }*/
 
     private static <T> ResponseEntity<T> curlWithRetry(String resourceUrl,
                                                     final int retryTimes,
@@ -198,18 +210,18 @@ public class KeyVaultIT {
         while (rt-- > 0 && httpStatus != HttpStatus.OK) {
             SdkContext.sleep(sleepMills);
 
-            log.info("CURLing " + resourceUrl);
+            LOGGER.info("CURLing " + resourceUrl);
 
             try {
                 response = restTemplate.getForEntity(resourceUrl, clazz);
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
 
             httpStatus = response.getStatusCode();
         }
         return response;
-    }*/
+    }
 
     @SpringBootApplication
     public static class DumbApp {

@@ -4,7 +4,7 @@
 package com.microsoft.azure.test.keyvault.group;
 
 import com.microsoft.azure.spring.autoconfigure.aad.AADAuthenticationFilter;
-import com.microsoft.azure.test.AppRunner;
+import com.microsoft.azure.test.utils.AppRunner;
 import com.microsoft.azure.test.oauth.OAuthResponse;
 import com.microsoft.azure.test.oauth.OAuthUtils;
 import org.junit.Test;
