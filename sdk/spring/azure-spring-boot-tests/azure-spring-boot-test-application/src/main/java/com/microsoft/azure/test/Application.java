@@ -32,7 +32,7 @@ public class Application implements CommandLineRunner {
     private ConfigurableEnvironment environment;
 
 
-    @Value("${azure.cosmosdb.key:local}")
+    @Value("${spring.cosmos.db.key:local}")
     private String cosmosDBkey;
 
     private static ObjectMapper mapper = new ObjectMapper();

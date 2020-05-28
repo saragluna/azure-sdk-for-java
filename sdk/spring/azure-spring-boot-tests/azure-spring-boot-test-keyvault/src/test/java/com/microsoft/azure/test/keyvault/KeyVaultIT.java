@@ -50,24 +50,6 @@ public class KeyVaultIT {
 //    private static String TEST_KEYVAULT_APP_JAR_PATH;
 //    private static String TEST_KEYVAULT_APP_ZIP_PATH;
 
-//    @BeforeClass
-//    public static void createKeyVault() throws IOException {
-//        restTemplate = new RestTemplate();
-//
-//        TEST_KEYVAULT_APP_JAR_PATH = new File(System.getProperty("keyvault.app.jar.path")).getCanonicalPath();
-//        TEST_KEYVAULT_APP_ZIP_PATH = new File(System.getProperty("keyvault.app.zip.path")).getCanonicalPath();
-//        log.info("keyvault.app.jar.path={}", TEST_KEYVAULT_APP_JAR_PATH);
-//        log.info("keyvault.app.zip.path={}", TEST_KEYVAULT_APP_ZIP_PATH);
-//        log.info("--------------------->resources provision over");
-//    }
-
-//    @AfterClass
-//    public static void deleteResourceGroup() {
-//        final ResourceGroupTool tool = new ResourceGroupTool(access);
-//        tool.deleteGroup(resourceGroupName);
-//        log.info("--------------------->resources clean over");
-//    }
-
     @Test
     public void keyVaultAsPropertySource() {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
@@ -116,8 +98,8 @@ public class KeyVaultIT {
             .getByResourceGroup(SPRING_RESOURCE_GROUP, APP_SERVICE_NAME);
 
 
-        final MavenBasedProject app = new MavenBasedProject(TEST_APPLICATION_PATH_PREFIX + "azure-spring-boot-test-application");
-        app.assembly();
+        final MavenBasedProject app = new MavenBasedProject("../azure-spring-boot-test-application");
+        app.packageUp();
 
         // Deploy zip
         // Add retry logic here to avoid Kudu's socket timeout issue.
@@ -131,7 +113,7 @@ public class KeyVaultIT {
                 LOGGER.info(String.format("Deployed the artifact to https://%s", webApp.defaultHostName()));
                 break;
             } catch (Exception e) {
-                LOGGER.debug(String.format("Exception occurred when deploying the zip package: %s, "
+                LOGGER.error(String.format("Exception occurred when deploying the zip package: %s, "
                     + "retrying immediately (%d/%d)", e.getMessage(), retryCount, DEFAULT_MAX_RETRY_TIMES));
             }
         }
