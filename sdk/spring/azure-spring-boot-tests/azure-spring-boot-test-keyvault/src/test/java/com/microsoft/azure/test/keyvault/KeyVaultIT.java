@@ -34,7 +34,6 @@ public class KeyVaultIT {
     private static final String KEY_VAULT_SECRET_NAME = System.getenv("KEY_VAULT_SECRET_NAME");
     private static final String SPRING_RESOURCE_GROUP = System.getenv("SPRING_RESOURCE_GROUP");
     private static final String APP_SERVICE_NAME = System.getenv("APP_SERVICE_NAME");
-    private static final String TEST_APPLICATION_PATH_PREFIX = "sdk/spring/azure-spring-boot-tests/";
     private static final int DEFAULT_MAX_RETRY_TIMES = 3;
 
     private final ClientSecretAccess clientSecretAccess = ClientSecretAccess.load();

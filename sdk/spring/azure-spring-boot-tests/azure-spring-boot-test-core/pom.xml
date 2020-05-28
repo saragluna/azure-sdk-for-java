@@ -19,6 +19,10 @@
       <artifactId>spring-boot</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
@@ -31,6 +35,26 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
       <version>3.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.aether</groupId>
+      <artifactId>aether-connector-basic</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.aether</groupId>
+      <artifactId>aether-transport-wagon</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-http</artifactId>
+      <version>3.3.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-api</artifactId>
+      <version>3.3.4</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.azure</groupId>
@@ -70,6 +94,10 @@
                 <include>com.microsoft.azure:*</include>
                 <include>org.apache.maven:maven-embedder:[3.6.2]</include>
                 <include>org.apache.maven:maven-compat:[3.6.2]</include>
+                <include>org.apache.maven.wagon:wagon-http:[3.3.4]</include>
+                <include>org.apache.maven.wagon:aether-connector-basic:[1.11.0]</include>
+                <include>org.apache.maven.wagon:aether-transport-wagon:[1.11.0]</include>
+                <include>org.eclipse.aether:wagon-provider-api:[3.3.4]</include>
                 <include>org.springframework.boot:spring-boot:[2.2.0.RELEASE]</include>
                 <include>org.springframework.boot:spring-boot-starter-web:[2.2.0.RELEASE]
                 </include> <!-- {x-include-update;org.springframework.boot:spring-boot-starter-web;external_dependency} -->
