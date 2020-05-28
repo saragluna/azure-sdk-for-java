@@ -72,8 +72,7 @@ public class MavenBasedProject {
     public String zipFile() {
         try (FileInputStream input = new FileInputStream(new File(path, "pom.xml"))) {
             MavenXpp3Reader reader = new MavenXpp3Reader();
-            Model model = reader.read(input);
-
+            reader.read(input);
             File result = new File(new File(path, "target"), "app.zip");
             return result.getAbsolutePath();
 
