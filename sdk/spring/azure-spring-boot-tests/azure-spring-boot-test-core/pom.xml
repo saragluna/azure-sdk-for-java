@@ -67,6 +67,9 @@
             <bannedDependencies>
               <includes>
                 <include>com.azure:*</include>
+                <include>com.microsoft.azure:*</include>
+                <include>org.apache.maven:maven-embedder:[3.6.2]</include>
+                <include>org.apache.maven:maven-compat:[3.6.2]</include>
                 <include>org.springframework.boot:spring-boot:[2.2.0.RELEASE]</include>
                 <include>org.springframework.boot:spring-boot-starter-web:[2.2.0.RELEASE]
                 </include> <!-- {x-include-update;org.springframework.boot:spring-boot-starter-web;external_dependency} -->
