@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class MavenBasedProject {
 
-    private String path;
+    private final String path;
 
     public MavenBasedProject(String path) {
         this.path = path;
@@ -28,7 +28,7 @@ public class MavenBasedProject {
         executeMaven("-q", "assembly:single");
     }
 
-    private void executeMaven(String ... commands) {
+    private void executeMaven(String... commands) {
         String existing = setMavenSystemProp(path);
         try {
             MavenCli cli = new MavenCli();
@@ -80,12 +80,6 @@ public class MavenBasedProject {
         } catch (IOException | XmlPullParserException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    public static void main(String[] args) {
-        final MavenBasedProject project = new MavenBasedProject("sdk/spring/azure-spring-boot-tests/azure-spring-boot-test-application");
-        project.packageUp();
-        System.out.println(project.artifact());
     }
 
 }
