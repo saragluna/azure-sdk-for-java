@@ -57,6 +57,7 @@ public class KeyVaultIT {
     }
 
     @Test
+    @Ignore
     public void keyVaultAsPropertySource() {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
@@ -80,6 +81,7 @@ public class KeyVaultIT {
     }
 
     @Test
+    @Ignore
     public void keyVaultAsPropertySourceWithSpecificKeys() {
         try (AppRunner app = new AppRunner(DumbApp.class)) {
             app.property("azure.keyvault.enabled", "true");
@@ -98,6 +100,7 @@ public class KeyVaultIT {
     }
 
     @Test
+    @Ignore
     public void keyVaultWithAppServiceMSI() {
         final WebApp webApp = AZURE
             .webApps()
@@ -139,7 +142,6 @@ public class KeyVaultIT {
     }
 
     @Test
-    @Ignore
     public void keyVaultWithVirtualMachineMSI() throws Exception {
         final VirtualMachine vm = AZURE.virtualMachines().getByResourceGroup(SPRING_RESOURCE_GROUP, VM_NAME);
 

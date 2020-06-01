@@ -5,11 +5,13 @@ package com.microsoft.azure.test.keyvault;
 
 import com.microsoft.azure.test.mgmt.ClientSecretAccess;
 import com.microsoft.azure.test.utils.AppRunner;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class MultipleKeyVaultsIT {
 
     private static final String KEY_VAULT1_SECRET_VALUE = System.getenv("KEY_VAULT_SECRET_VALUE");
