@@ -156,6 +156,9 @@ public class KeyVaultIT {
         if (!file.exists()) {
             throw new FileNotFoundException("There's no app.jar file found.");
         }
+
+        LOGGER.info("Trying to connect to {}:22", host);
+
         try (SSHShell sshShell = SSHShell.open(host, 22, VM_USER_USERNAME, VM_USER_PASSWORD);
              FileInputStream fis = new FileInputStream(file)) {
             LOGGER.info("Uploading jar file...");
