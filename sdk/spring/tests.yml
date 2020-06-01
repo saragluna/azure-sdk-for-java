@@ -14,7 +14,7 @@ jobs:
             SubscriptionConfiguration: $(sub-config-azure-cloud-test-resources)
             AZURE_TEST_HTTP_CLIENTS: netty
         TestStepMavenInputs:
-          options: '-Dmaven.wagon.http.pool=false $(DefaultOptions) -Dmaven.javadoc.skip=true -Drevapi.skip=true -pl $(ProjectList)'
+          options: '-Dmaven.wagon.http.pool=false $(DefaultOptions) -Dmaven.javadoc.skip=true -Drevapi.skip=true -pl $(ProjectList) -X'
           goals: "verify"
 
         Artifacts:
