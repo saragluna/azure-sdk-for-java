@@ -10,6 +10,8 @@ without having any credentials in your code.
 Please note your application should run in VM (Virtual Machine) or App Services on Azure for
 support of MSI. Choose any of them.
 
+**Note**: When using managed identity, it's not supported to create resource group automatically, the resource group must be assigned `Contributor` role. 
+
 #### Method 1: Set up VM and assign identity
 
 1.  Create VM in Azure portal. Please refer to
@@ -35,6 +37,12 @@ support of MSI. Choose any of them.
    [Add or remove Azure role assignments][role-assignment]
    to add the role assignment for Resource Group.
 
+### Deploy application
+1. Replace your own configuration in *pom.xml*.
+
+1. Deploy to Azure App Service. Please see [Create a app on Azure App Service][create-java-app-on-app-service].
+
+
 For different built-in role’s descriptions, please see [Built-in role
 descriptions][built-in-roles].
 
@@ -49,3 +57,4 @@ descriptions][built-in-roles].
 [create-vm-linux]: https://docs.microsoft.com/azure/virtual-machines/linux/quick-create-portal
 [managed-identities]: https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/
 [role-assignment]: https://docs.microsoft.com/azure/role-based-access-control/role-assignments-portal
+[create-java-app-on-app-service]: https://docs.microsoft.com/en-us/azure/app-service/quickstart-java?tabs=javase&pivots=platform-linux
