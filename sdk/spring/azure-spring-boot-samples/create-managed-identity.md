@@ -57,4 +57,4 @@ descriptions][built-in-roles].
 [create-vm-linux]: https://docs.microsoft.com/azure/virtual-machines/linux/quick-create-portal
 [managed-identities]: https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/
 [role-assignment]: https://docs.microsoft.com/azure/role-based-access-control/role-assignments-portal
-[create-java-app-on-app-service]: https://docs.microsoft.com/en-us/azure/app-service/quickstart-java?tabs=javase&pivots=platform-linux
+[create-java-app-on-app-service]: https://docs.microsoft.com/azure/app-service/quickstart-java?tabs=javase&pivots=platform-linux
