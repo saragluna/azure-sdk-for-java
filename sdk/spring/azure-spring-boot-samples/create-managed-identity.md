@@ -43,8 +43,7 @@ support of MSI. Choose any of them.
 1. Deploy to Azure App Service. Please see [Create a app on Azure App Service][create-java-app-on-app-service].
 
 
-For different built-in role’s descriptions, please see [Built-in role
-descriptions][built-in-roles].
+For different built-in role’s descriptions, please see [Built-in role descriptions][built-in-roles].
 
 <!-- Links -->
 [app-service-add-system-assigned-mi]: https://docs.microsoft.com/azure/app-service/overview-managed-identity#adding-a-system-assigned-identity
