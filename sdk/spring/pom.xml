@@ -32,6 +32,11 @@
       <dependencies>
         <dependency>
           <groupId>com.azure.spring</groupId>
+          <artifactId>azure-identity-spring</artifactId>
+          <version>1.0.0-beta.1</version> <!-- {x-version-update;com.azure.spring:azure-identity-spring;current} -->
+        </dependency>
+        <dependency>
+          <groupId>com.azure.spring</groupId>
           <artifactId>azure-spring-boot</artifactId>
           <version>3.0.0-beta.2</version> <!-- {x-version-update;com.azure.spring:azure-spring-boot;current} -->
         </dependency>
@@ -144,13 +149,14 @@
         <module>azure-spring-boot-test-application</module>
         <module>azure-spring-boot-test-core</module>
         <module>azure-spring-boot-test-aad</module>
+        <module>azure-spring-boot-test-aad-obo</module>
         <module>azure-spring-boot-test-cosmos</module>
         <module>azure-spring-boot-test-keyvault</module>
         <module>azure-spring-boot-test-servicebus-jms</module>
         <module>azure-spring-boot-test-storage</module>
         <module>azure-spring-cloud-test-eventhubs</module>
+        <module>azure-spring-boot-samples/azure-spring-boot-sample-active-directory-resource-server-with-filter</module>
         <module>azure-spring-boot-samples/azure-spring-boot-sample-active-directory-resource-server</module>
-        <module>azure-spring-boot-samples/azure-spring-boot-sample-active-directory-spring-security-resource-server</module>
         <module>azure-spring-boot-samples/azure-spring-boot-sample-active-directory-webapp</module>
         <module>azure-spring-boot-samples/azure-spring-boot-sample-active-directory-b2c-oidc</module>
         <module>azure-spring-boot-samples/azure-spring-boot-sample-active-directory-resource-server-obo</module>
