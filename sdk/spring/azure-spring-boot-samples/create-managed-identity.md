@@ -38,7 +38,7 @@ support of MSI. Choose any of them.
    to add the role assignment for Resource Group.
 
 ### Deploy application
-1. Run `mvn com.microsoft.azure:azure-webapp-maven-plugin:1.12.0:config` to configure in *pom.xml*.
+1. Run `mvn azure-webapp:config` to configure in *pom.xml*.
 
 1. Run `mvn clean package azure-webapp:deploy` to deploy to Azure App Service. Please see [Create a app on Azure App Service][create-java-app-on-app-service].
 
