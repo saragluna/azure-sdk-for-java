@@ -10,7 +10,7 @@ without having any credentials in your code.
 Please note your application should run in VM (Virtual Machine) or App Services on Azure for
 support of MSI. Choose any of them.
 
-**Note**: When using managed identity, it's not supported to create resource group automatically, the resource group must be assigned `Contributor` role. 
+**Note**: When using Managed Identity, it's not supported to create a resource group automatically, and at least the resource group must be assigned `Contributor` role. 
 
 #### Method 1: Set up VM and assign identity
 
@@ -38,7 +38,7 @@ support of MSI. Choose any of them.
    to add the role assignment for Resource Group.
 
 ### Deploy application
-1. Replace your own configuration in *pom.xml*.
+1. Run your own configuration in *pom.xml*.
 
 1. Deploy to Azure App Service. Please see [Create a app on Azure App Service][create-java-app-on-app-service].
 

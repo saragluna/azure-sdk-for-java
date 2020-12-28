@@ -88,9 +88,7 @@
         <configuration>
           <schemaVersion>V2</schemaVersion>
           <resourceGroup>[your-resource-group]</resourceGroup>
-          <appName>eh-single-binder-user-mi-auto</appName>
-          <pricingTier>[select-your-pricing-tier]</pricingTier>
-          <region>[select-your-region]</region>
+          <appName>[your-app-name]</appName>
           <runtime>
             <os>Linux</os>
             <javaVersion>Java 8</javaVersion>
