@@ -4,6 +4,7 @@
 package com.azure.spring.integration.eventhub.converter;
 
 import com.azure.messaging.eventhubs.EventData;
+import com.azure.spring.integration.core.AzureHeaders;
 import com.azure.spring.integration.core.EventHubHeaders;
 import com.azure.spring.integration.core.converter.AbstractAzureMessageConverter;
 import org.slf4j.Logger;
@@ -28,10 +29,11 @@ import java.util.Set;
  */
 public class EventHubMessageConverter extends AbstractAzureMessageConverter<EventData> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventHubMessageConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventHubMessageConverter.class);
 
-    private static final Set<String> SYSTEM_HEADERS = Collections.unmodifiableSet(new HashSet<>(
-        Arrays.asList(EventHubHeaders.ENQUEUED_TIME, EventHubHeaders.OFFSET, EventHubHeaders.SEQUENCE_NUMBER)));
+    private static final Set<String> SYSTEM_HEADERS = Collections.unmodifiableSet(
+        new HashSet<>(Arrays.asList(AzureHeaders.PARTITION_ID, EventHubHeaders.ENQUEUED_TIME,
+            EventHubHeaders.OFFSET, EventHubHeaders.SEQUENCE_NUMBER)));
 
     @Override
     protected byte[] getPayload(EventData azureMessage) {
@@ -56,10 +58,11 @@ public class EventHubMessageConverter extends AbstractAzureMessageConverter<Even
                     && value instanceof LinkedMultiValueMap) {
                 azureMessage.getProperties().put(key, toJson(value));
             } else {
-                if (!SYSTEM_HEADERS.contains(key)) {
-                    azureMessage.getProperties().put(key, value.toString());
+                if (SYSTEM_HEADERS.contains(key)) {
+                    LOGGER.warn("System property {}({}) is not allowed to be defined and will be ignored.",
+                        key, value);
                 } else {
-                    LOG.warn("System property {}({}) is not allowed to be defined and will be ignored.", key, value);
+                    azureMessage.getProperties().put(key, value.toString());
                 }
             }
         });

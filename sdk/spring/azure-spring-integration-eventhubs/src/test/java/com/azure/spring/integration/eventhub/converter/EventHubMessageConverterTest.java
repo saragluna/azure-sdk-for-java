@@ -27,15 +27,18 @@ import static org.junit.Assert.assertTrue;
 public class EventHubMessageConverterTest extends AzureMessageConverterTest<EventData> {
 
     private static final String EVENT_DATA = "event-hub-test-string";
-    private static final String RAW_PARTITION_ID = "1";
+
+    private static final String PARTITION_ID = "1";
+    private static final Instant ENQUEUED_TIME = Instant.now().minus(1, ChronoUnit.DAYS);
+    private static final Long OFFSET = 1234567890L;
+    private static final Long SEQUENCE_NUMBER = 123456L;
+
     private static final String NATIVE_HEADERS_SPAN_ID_KEY = "spanId";
     private static final List<String> NATIVE_HEADERS_SPAN_ID_VALUE = Arrays.asList("spanId-1", "spanId-2");
     private static final String NATIVE_HEADERS_SPAN_TRACE_ID_KEY = "spanTraceId";
     private static final List<String> NATIVE_HEADERS_SPAN_TRACE_ID_VALUE = Arrays
             .asList("spanTraceId-1", "spanTraceId-2");
-    private static final Instant ENQUEUED_TIME = Instant.now().minus(1, ChronoUnit.DAYS);
-    private static final Long OFFSET = 1234567890L;
-    private static final Long SEQUENCE_NUMBER = 1234567890L;
+
     
     @Override
     protected EventData getInstance() {
@@ -67,12 +70,12 @@ public class EventHubMessageConverterTest extends AzureMessageConverterTest<Even
     public void testSetCustomHeadersWithCommon() {
         EventData eventData = new EventData(EVENT_DATA);
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put(AzureHeaders.RAW_PARTITION_ID, RAW_PARTITION_ID);
+        headerMap.put(AzureHeaders.RAW_PARTITION_ID, PARTITION_ID);
         MessageHeaders headers = new MessageHeaders(headerMap);
 
         MyEventHubMessageConverter convert = new MyEventHubMessageConverter();
         convert.setCustomHeaders(headers, eventData);
-        assertEquals(eventData.getProperties().get(AzureHeaders.RAW_PARTITION_ID), RAW_PARTITION_ID);
+        assertEquals(eventData.getProperties().get(AzureHeaders.RAW_PARTITION_ID), PARTITION_ID);
         assertEquals(eventData.getBodyAsString(), EVENT_DATA);
     }
 
@@ -95,10 +98,10 @@ public class EventHubMessageConverterTest extends AzureMessageConverterTest<Even
     @Test
     public void testBuildCustomHeadersWithCommon() {
         EventData eventData = new EventData(EVENT_DATA);
-        eventData.getProperties().put(AzureHeaders.RAW_PARTITION_ID, RAW_PARTITION_ID);
+        eventData.getProperties().put(AzureHeaders.RAW_PARTITION_ID, PARTITION_ID);
         MyEventHubMessageConverter convert = new MyEventHubMessageConverter();
         Map<String, Object> headerHeadersMap = convert.buildCustomHeaders(eventData);
-        assertEquals(headerHeadersMap.get(AzureHeaders.RAW_PARTITION_ID), RAW_PARTITION_ID);
+        assertEquals(headerHeadersMap.get(AzureHeaders.RAW_PARTITION_ID), PARTITION_ID);
         assertEquals(eventData.getBodyAsString(), EVENT_DATA);
     }
 
@@ -119,35 +122,28 @@ public class EventHubMessageConverterTest extends AzureMessageConverterTest<Even
     public void testSetCustomHeadersWithSystemProperties() {
         EventData eventData = new EventData(EVENT_DATA);
         Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put(AzureHeaders.PARTITION_ID, PARTITION_ID);
         headerMap.put(EventHubHeaders.ENQUEUED_TIME, ENQUEUED_TIME);
         headerMap.put(EventHubHeaders.OFFSET, OFFSET);
         headerMap.put(EventHubHeaders.SEQUENCE_NUMBER, SEQUENCE_NUMBER);
-        headerMap.put(AzureHeaders.RAW_PARTITION_ID, RAW_PARTITION_ID);
         MessageHeaders headers = new MessageHeaders(headerMap);
 
         MyEventHubMessageConverter convert = new MyEventHubMessageConverter();
         convert.setCustomHeaders(headers, eventData);
-        assertFalse(eventData.getSystemProperties().containsKey(EventHubHeaders.ENQUEUED_TIME));
-        assertFalse(eventData.getSystemProperties().containsKey(EventHubHeaders.OFFSET));
-        assertFalse(eventData.getSystemProperties().containsKey(EventHubHeaders.SEQUENCE_NUMBER));
-        assertFalse(eventData.getSystemProperties().containsKey(AzureHeaders.RAW_PARTITION_ID));
-
+        assertFalse(eventData.getProperties().containsKey(AzureHeaders.PARTITION_ID));
         assertFalse(eventData.getProperties().containsKey(EventHubHeaders.ENQUEUED_TIME));
         assertFalse(eventData.getProperties().containsKey(EventHubHeaders.OFFSET));
         assertFalse(eventData.getProperties().containsKey(EventHubHeaders.SEQUENCE_NUMBER));
-        assertTrue(eventData.getProperties().containsKey(AzureHeaders.RAW_PARTITION_ID));
-        assertEquals(eventData.getProperties().get(AzureHeaders.RAW_PARTITION_ID), RAW_PARTITION_ID);
     }
 
     @Test
     public void testBuildCustomHeadersWithSystemProperties() {
         EventData eventData = new EventData(EVENT_DATA);
-        eventData.getProperties().put(AzureHeaders.RAW_PARTITION_ID, RAW_PARTITION_ID);
         MyEventHubMessageConverter convert = new MyEventHubMessageConverter();
         Map<String, Object> headerHeadersMap = convert.buildCustomHeaders(eventData);
-        assertEquals(headerHeadersMap.get(AzureHeaders.RAW_PARTITION_ID), RAW_PARTITION_ID);
         assertTrue(headerHeadersMap.containsKey(EventHubHeaders.ENQUEUED_TIME));
         assertTrue(headerHeadersMap.containsKey(EventHubHeaders.OFFSET));
         assertTrue(headerHeadersMap.containsKey(EventHubHeaders.SEQUENCE_NUMBER));
+        assertTrue(headerHeadersMap.containsKey(EventHubHeaders.PARTITION_KEY));
     }
 }
