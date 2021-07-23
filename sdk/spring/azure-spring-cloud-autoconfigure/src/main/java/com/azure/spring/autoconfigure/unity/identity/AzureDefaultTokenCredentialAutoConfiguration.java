@@ -5,7 +5,9 @@ package com.azure.spring.autoconfigure.unity.identity;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ChainedTokenCredentialBuilder;
+import com.azure.spring.MappingCredentialPropertiesProvider;
 import com.azure.spring.autoconfigure.unity.AzureProperties;
+import com.azure.spring.autoconfigure.unity.SpringAzureProperties;
 import com.azure.spring.identity.SpringAzureCliCredentialBuilder;
 import com.azure.spring.identity.SpringAzurePowerShellCredentialBuilder;
 import com.azure.spring.identity.SpringCredentialBuilderBase;
@@ -13,7 +15,9 @@ import com.azure.spring.identity.SpringEnvironmentCredentialBuilder;
 import com.azure.spring.identity.SpringIntelliJCredentialBuilder;
 import com.azure.spring.identity.SpringManagedIdentityCredentialBuilder;
 import com.azure.spring.identity.SpringVisualStudioCodeCredentialBuilder;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -24,6 +28,7 @@ import java.util.List;
  * Auto-configuration for Azure Spring default token credential.
  */
 @Configuration
+@ConditionalOnProperty(name = AzureProperties.PREFIX)
 public class AzureDefaultTokenCredentialAutoConfiguration {
 
     public static final int SPRING_ENV_CREDENTIAL_ORDER = 0;
@@ -85,6 +90,12 @@ public class AzureDefaultTokenCredentialAutoConfiguration {
             chainedTokenCredentialBuilder.addLast(builder.build());
         }
         return chainedTokenCredentialBuilder.build();
+    }
+
+    @Bean
+    public MappingCredentialPropertiesProvider cosmosCredentialPropertiesProvider(
+        ObjectProvider<SpringAzureProperties> springProperties) {
+        return new SpringMappingCredentialPropertiesProvider((AzureProperties) springProperties.getIfAvailable());
     }
 
     /*@Bean

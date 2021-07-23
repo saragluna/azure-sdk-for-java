@@ -4,10 +4,10 @@
 package com.azure.spring.autoconfigure.storage;
 
 import com.azure.spring.autoconfigure.unity.AzureProperties;
+import com.azure.spring.autoconfigure.unity.SpringAzureProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 /**
@@ -15,11 +15,11 @@ import javax.validation.constraints.Pattern;
  */
 @Validated
 @ConfigurationProperties(StorageProperties.PREFIX)
-public class StorageProperties extends AzureProperties {
+public class StorageProperties extends AzureProperties implements SpringAzureProperties {
 
     public static final String PREFIX = "spring.cloud.azure.storage";
 
-    @NotEmpty
+//    @NotEmpty
     @Pattern(regexp = "^[a-z0-9]{3,24}$",
         message = "must be between 3 and 24 characters in length and use numbers and lower-case letters only")
     private String accountName;

@@ -71,42 +71,43 @@ class KeyVaultEnvironmentPostProcessorHelper {
                                                           .orElse(null);
         Assert.notNull(vaultUri, "vaultUri must not be null!");
         final Long refreshInterval = Optional.ofNullable(getPropertyValue(normalizedName, Property.REFRESH_INTERVAL))
-                .map(Long::valueOf)
-                .orElse(DEFAULT_REFRESH_INTERVAL_MS);
+                                             .map(Long::valueOf)
+                                             .orElse(DEFAULT_REFRESH_INTERVAL_MS);
         final List<String> secretKeys = Binder.get(this.environment)
-                .bind(
-                        KeyVaultProperties.getPropertyName(normalizedName, Property.SECRET_KEYS),
-                        Bindable.listOf(String.class)
-                )
-                .orElse(Collections.emptyList());
+                                              .bind(
+                                                  KeyVaultProperties.getPropertyName(normalizedName,
+                                                      Property.SECRET_KEYS),
+                                                  Bindable.listOf(String.class)
+                                              )
+                                              .orElse(Collections.emptyList());
 
-        final TokenCredential tokenCredential = getCredentials(normalizedName);
+        final TokenCredential tokenCredential = getOrDefaultCredentials(normalizedName);
         final SecretClient secretClient = new SecretClientBuilder()
-                .vaultUrl(vaultUri)
-                .credential(tokenCredential)
-                .serviceVersion(secretServiceVersion)
-                .httpLogOptions(new HttpLogOptions().setApplicationId(AZURE_SPRING_KEY_VAULT + VERSION))
-                .buildClient();
+            .vaultUrl(vaultUri)
+            .credential(tokenCredential)
+            .serviceVersion(secretServiceVersion)
+            .httpLogOptions(new HttpLogOptions().setApplicationId(AZURE_SPRING_KEY_VAULT + VERSION))
+            .buildClient();
         try {
             final MutablePropertySources sources = this.environment.getPropertySources();
             final boolean caseSensitive = Boolean
-                    .parseBoolean(getPropertyValue(normalizedName, Property.CASE_SENSITIVE_KEYS));
+                .parseBoolean(getPropertyValue(normalizedName, Property.CASE_SENSITIVE_KEYS));
             final KeyVaultOperation keyVaultOperation = new KeyVaultOperation(
-                    secretClient,
-                    refreshInterval,
-                    secretKeys,
-                    caseSensitive);
+                secretClient,
+                refreshInterval,
+                secretKeys,
+                caseSensitive);
 
             String propertySourceName = Optional.of(normalizedName)
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .orElse(AZURE_KEYVAULT_PROPERTYSOURCE_NAME);
+                                                .map(String::trim)
+                                                .filter(s -> !s.isEmpty())
+                                                .orElse(AZURE_KEYVAULT_PROPERTYSOURCE_NAME);
             KeyVaultPropertySource keyVaultPropertySource =
-                    new KeyVaultPropertySource(propertySourceName, keyVaultOperation);
+                new KeyVaultPropertySource(propertySourceName, keyVaultOperation);
             if (sources.contains(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
                 sources.addAfter(
-                        SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                        keyVaultPropertySource
+                    SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                    keyVaultPropertySource
                 );
             } else {
                 sources.addFirst(keyVaultPropertySource);
@@ -123,51 +124,60 @@ class KeyVaultEnvironmentPostProcessorHelper {
      * @return the token credentials.
      */
     public TokenCredential getCredentials() {
-        return getCredentials("");
+        return getOrDefaultCredentials("");
     }
 
     /**
-     * Get the token credentials.
+     * Return the token credentials which is created by KeyVaultProperties or the default AzureProperties.
      *
      * @param normalizedName the normalized name of the key vault.
      * @return the token credentials.
      */
-    public TokenCredential getCredentials(String normalizedName) {
+    public TokenCredential getOrDefaultCredentials(String normalizedName) {
+        return Optional.ofNullable(getCredentials(KeyVaultProperties.PREFIX, normalizedName))
+                       .or(() -> Optional.ofNullable(getCredentials(AzureProperties.PREFIX, normalizedName)))
+                       .orElse(new ManagedIdentityCredentialBuilder().build());
+    }
+
+    public TokenCredential getCredentials(String prefix, String normalizedName) {
         //use service principle to authenticate
-        final String clientId = getPropertyValue(normalizedName, Property.CLIENT_ID);
-        final String clientSecret = Optional.ofNullable(getPropertyValue(normalizedName, Property.CLIENT_SECRET))
-                                            .orElse(getPropertyValue(normalizedName, Property.CLIENT_KEY));
-        final String tenantId = getPropertyValue(normalizedName, Property.TENANT_ID);
-        final String certificatePath = getPropertyValue(normalizedName, Property.CERTIFICATE_PATH);
-        final String certificatePassword = getPropertyValue(normalizedName, Property.CERTIFICATE_PASSWORD);
-        final String authorityHost = Optional.ofNullable(getPropertyValue(normalizedName, Property.AUTHORITY_HOST))
+        final String clientId = getPropertyValueByPrefix(prefix, normalizedName, Property.CLIENT_ID);
+        final String clientSecret = Optional.ofNullable(getPropertyValueByPrefix(prefix, normalizedName,
+            Property.CLIENT_SECRET))
+                                            .orElse(getPropertyValueByPrefix(prefix, normalizedName, Property.CLIENT_KEY));
+        final String tenantId = getPropertyValueByPrefix(prefix, normalizedName, Property.TENANT_ID);
+        final String certificatePath = getPropertyValueByPrefix(prefix, normalizedName, Property.CERTIFICATE_PATH);
+        final String certificatePassword = getPropertyValueByPrefix(prefix, normalizedName,
+            Property.CERTIFICATE_PASSWORD);
+        final String authorityHost = Optional.ofNullable(getPropertyValueByPrefix(prefix, normalizedName,
+            Property.AUTHORITY_HOST))
                                              .orElse(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD);
         if (clientId != null && tenantId != null && clientSecret != null) {
             LOGGER.debug("Will use custom credentials");
             return new ClientSecretCredentialBuilder()
-                    .clientId(clientId)
-                    .clientSecret(clientSecret)
-                    .tenantId(tenantId)
-                    .authorityHost(authorityHost)
-                    .build();
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .tenantId(tenantId)
+                .authorityHost(authorityHost)
+                .build();
         }
         // Use certificate to authenticate
         // Password can be empty
         if (clientId != null && tenantId != null && certificatePath != null) {
             if (!StringUtils.hasText(certificatePassword)) {
                 return new ClientCertificateCredentialBuilder()
-                        .tenantId(tenantId)
-                        .clientId(clientId)
-                        .pemCertificate(certificatePath)
-                        .authorityHost(authorityHost)
-                        .build();
+                    .tenantId(tenantId)
+                    .clientId(clientId)
+                    .pemCertificate(certificatePath)
+                    .authorityHost(authorityHost)
+                    .build();
             } else {
                 return new ClientCertificateCredentialBuilder()
-                        .tenantId(tenantId)
-                        .clientId(clientId)
-                        .authorityHost(authorityHost)
-                        .pfxCertificate(certificatePath, certificatePassword)
-                        .build();
+                    .tenantId(tenantId)
+                    .clientId(clientId)
+                    .authorityHost(authorityHost)
+                    .pfxCertificate(certificatePath, certificatePassword)
+                    .build();
             }
         }
         //use MSI to authenticate
@@ -175,14 +185,20 @@ class KeyVaultEnvironmentPostProcessorHelper {
             LOGGER.debug("Will use MSI credentials with specified clientId");
             return new ManagedIdentityCredentialBuilder().clientId(clientId).build();
         }
-        LOGGER.debug("Will use MSI credentials");
-        return new ManagedIdentityCredentialBuilder().build();
+
+        return null;
     }
 
     @VisibleForTesting
     String getPropertyValue(final String normalizedName, final Property property) {
-        List<String> propertyNames = Arrays.asList(KeyVaultProperties.getPropertyName(normalizedName, property),
-            AzureProperties.PREFIX + DELIMITER + property.getName());
+        return getPropertyValueByPrefix(KeyVaultProperties.PREFIX, normalizedName, property);
+    }
+
+    @VisibleForTesting
+    String getPropertyValueByPrefix(final String prefix, final String normalizedName, final Property property) {
+        List<String> propertyNames = Arrays.asList(
+            KeyVaultProperties.getPropertyName(prefix, normalizedName, property),
+            prefix + DELIMITER + property.getName());
 
         String propertyValue = null;
         for (String key : propertyNames) {
