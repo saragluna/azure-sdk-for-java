@@ -2,6 +2,6 @@
 // Licensed under the MIT License.
 
 /**
- * Package com.azure.spring.keyvault
+ * Package com.azure.spring
  */
-package com.azure.spring.keyvault;
+package com.azure.spring;

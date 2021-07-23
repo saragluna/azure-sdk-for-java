@@ -4,21 +4,26 @@
 package com.azure.spring.autoconfigure.cosmos;
 
 import com.azure.core.credential.AzureKeyCredential;
+import com.azure.core.credential.TokenCredential;
 import com.azure.cosmos.ConnectionMode;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.spring.autoconfigure.unity.AzureProperties;
+import com.azure.spring.MappingCredentialPropertiesProvider;
+import com.azure.spring.autoconfigure.unity.identity.AzureDefaultTokenCredentialAutoConfiguration;
 import com.azure.spring.data.cosmos.config.AbstractCosmosConfiguration;
 import com.azure.spring.data.cosmos.config.CosmosConfig;
 import com.azure.spring.data.cosmos.core.CosmosTemplate;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
-import static com.azure.spring.autoconfigure.unity.AzureProperties.AZURE_PROPERTY_BEAN_NAME;
+import java.util.Optional;
 
 /**
  * Auto Configure Cosmos properties and connection policy.
@@ -27,15 +32,12 @@ import static com.azure.spring.autoconfigure.unity.AzureProperties.AZURE_PROPERT
 @ConditionalOnClass({ CosmosAsyncClient.class, CosmosTemplate.class })
 @ConditionalOnResource(resources = "classpath:cosmos.enable.config")
 @EnableConfigurationProperties(CosmosProperties.class)
+@AutoConfigureAfter(AzureDefaultTokenCredentialAutoConfiguration.class)
 public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     private final CosmosProperties cosmosProperties;
-    private final AzureProperties azureProperties;
 
-
-    public CosmosAutoConfiguration(CosmosProperties cosmosProperties,
-                                   @Qualifier(AZURE_PROPERTY_BEAN_NAME) AzureProperties azureProperties) {
+    public CosmosAutoConfiguration(CosmosProperties cosmosProperties) {
         this.cosmosProperties = cosmosProperties;
-        this.azureProperties = azureProperties;
     }
 
     @Override
@@ -44,20 +46,44 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public AzureKeyCredential azureKeyCredential() {
-        return new AzureKeyCredential(cosmosProperties.getKey());
+        return Optional.ofNullable(cosmosProperties.getKey())
+                       .filter(StringUtils::hasText)
+                       .map(AzureKeyCredential::new)
+                       .orElse(null);
     }
 
     @Bean
-    public CosmosClientBuilder cosmosClientBuilder(AzureKeyCredential azureKeyCredential) {
-        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder();
-        cosmosClientBuilder.credential(azureKeyCredential)
-                           .consistencyLevel(cosmosProperties.getConsistencyLevel())
-                           .endpoint(cosmosProperties.getUri());
+    @ConditionalOnMissingBean
+    public CosmosClientBuilder cosmosClientBuilder(
+        ObjectProvider<AzureKeyCredential> azureKeyCredentials,
+        ObjectProvider<MappingCredentialPropertiesProvider> mappingPropertiesProviders,
+        ObjectProvider<TokenCredential> defaultTokenCredentials) {
+        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder()
+            .consistencyLevel(cosmosProperties.getConsistencyLevel())
+            .endpoint(cosmosProperties.getUri());
         if (ConnectionMode.GATEWAY == cosmosProperties.getConnectionMode()) {
             cosmosClientBuilder.gatewayMode();
         }
-        return cosmosClientBuilder;
+        AzureKeyCredential azureKeyCredential = azureKeyCredentials.getIfAvailable();
+        if (azureKeyCredential != null) {
+            return cosmosClientBuilder.credential(azureKeyCredential);
+        }
+
+        MappingCredentialPropertiesProvider propertiesProvider = mappingPropertiesProviders.orderedStream()
+                                                                                           .findFirst()
+                                                                                           .orElse(null);
+        if (propertiesProvider != null) {
+            return cosmosClientBuilder.credential(propertiesProvider.mappingTokenCredential());
+        }
+
+        TokenCredential defaultTokenCredential = defaultTokenCredentials.orderedStream().findFirst().orElse(null);
+        if (defaultTokenCredential != null) {
+            cosmosClientBuilder.credential(defaultTokenCredential);
+        }
+
+        throw new IllegalStateException("Not found any credential properties configured.");
     }
 
     @Override

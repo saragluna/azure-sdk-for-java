@@ -6,11 +6,12 @@ package com.azure.spring.cloud.context.core.storage;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.resourcemanager.resources.fluentcore.utils.ResourceManagerUtils;
 import com.azure.resourcemanager.storage.models.StorageAccount;
+import org.springframework.core.Ordered;
 
 /**
  * A provider that holds the storage account connection string.
  */
-public class StorageConnectionStringProvider {
+public class StorageConnectionStringProvider implements Ordered {
 
     private final String connectionString;
 
@@ -20,6 +21,11 @@ public class StorageConnectionStringProvider {
 
     public StorageConnectionStringProvider(String accountName, String accountKey, AzureEnvironment environment) {
         this.connectionString = ResourceManagerUtils.getStorageConnectionString(accountName, accountKey, environment);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
     private static String buildConnectionString(StorageAccount storageAccount) {
