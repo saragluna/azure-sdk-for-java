@@ -80,7 +80,7 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
 
         TokenCredential defaultTokenCredential = defaultTokenCredentials.orderedStream().findFirst().orElse(null);
         if (defaultTokenCredential != null) {
-            cosmosClientBuilder.credential(defaultTokenCredential);
+            return cosmosClientBuilder.credential(defaultTokenCredential);
         }
 
         throw new IllegalStateException("Not found any credential properties configured.");

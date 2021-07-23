@@ -5,6 +5,7 @@ package com.azure.spring.autoconfigure.storage;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.policy.HttpLogOptions;
+import com.azure.spring.MappingCredentialPropertiesProvider;
 import com.azure.spring.autoconfigure.storage.resource.AzureStorageProtocolResolver;
 import com.azure.spring.autoconfigure.unity.identity.AzureDefaultTokenCredentialAutoConfiguration;
 import com.azure.spring.identity.SpringEnvironmentCredential;
@@ -12,6 +13,7 @@ import com.azure.spring.identity.SpringEnvironmentCredentialBuilder;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.common.StorageSharedKeyCredential;
 import com.azure.storage.file.share.ShareServiceClientBuilder;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -51,7 +53,10 @@ public class StorageAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty("azure.storage.blob-endpoint")
-    public BlobServiceClientBuilder blobServiceClientBuilder(StorageProperties storageProperties) {
+    public BlobServiceClientBuilder blobServiceClientBuilder(
+        StorageProperties storageProperties,
+        ObjectProvider<MappingCredentialPropertiesProvider> mappingPropertiesProviders,
+        ObjectProvider<TokenCredential> defaultTokenCredentials) {
         final String accountName = storageProperties.getAccountName();
         final String accountKey = storageProperties.getAccountKey();
         BlobServiceClientBuilder serviceClientBuilder = new BlobServiceClientBuilder()
@@ -62,14 +67,19 @@ public class StorageAutoConfiguration {
             return serviceClientBuilder.credential(new StorageSharedKeyCredential(accountName, accountKey));
         }
 
-        SpringEnvironmentCredential environmentCredential = environmentCredentialBuilder.build();
-        if (environmentCredential != null) {
-            return serviceClientBuilder.credential(environmentCredential);
-        } else if (defaultTokenCredential != null) {
-            return serviceClientBuilder.credential(defaultTokenCredential);
-        } else {
-            throw new IllegalStateException("Not found any credential properties configured.");
+        MappingCredentialPropertiesProvider propertiesProvider = mappingPropertiesProviders.orderedStream()
+                                                                                           .findFirst()
+                                                                                           .orElse(null);
+        if (propertiesProvider != null) {
+            return serviceClientBuilder.credential(propertiesProvider.mappingTokenCredential());
         }
+
+        TokenCredential defaultTokenCredential = defaultTokenCredentials.orderedStream().findFirst().orElse(null);
+        if (defaultTokenCredential != null) {
+            return serviceClientBuilder.credential(defaultTokenCredential);
+        }
+
+        throw new IllegalStateException("Not found any credential properties configured.");
     }
 
     @Bean
