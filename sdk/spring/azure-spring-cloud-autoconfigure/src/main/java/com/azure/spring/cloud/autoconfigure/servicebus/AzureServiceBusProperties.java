@@ -4,13 +4,14 @@
 package com.azure.spring.cloud.autoconfigure.servicebus;
 
 import com.azure.core.amqp.AmqpTransportType;
+import com.azure.spring.autoconfigure.unity.AzureProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Warren Zhu
  */
 @ConfigurationProperties("spring.cloud.azure.servicebus")
-public class AzureServiceBusProperties {
+public class AzureServiceBusProperties extends AzureProperties {
 
     private String namespace;
 

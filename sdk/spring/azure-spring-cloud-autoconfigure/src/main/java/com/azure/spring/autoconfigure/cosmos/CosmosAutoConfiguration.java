@@ -8,12 +8,19 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.cosmos.ConnectionMode;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.spring.MappingCredentialPropertiesProvider;
+import com.azure.identity.ChainedTokenCredential;
+import com.azure.identity.ChainedTokenCredentialBuilder;
+import com.azure.spring.SpringMappingCredentialPropertiesProvider;
 import com.azure.spring.autoconfigure.unity.identity.AzureDefaultTokenCredentialAutoConfiguration;
 import com.azure.spring.data.cosmos.config.AbstractCosmosConfiguration;
 import com.azure.spring.data.cosmos.config.CosmosConfig;
 import com.azure.spring.data.cosmos.core.CosmosTemplate;
+import com.azure.spring.identity.AzureKeyCredentialClientBuilderCustomizer;
+import com.azure.spring.identity.ClientBuilderCustomizer;
+import com.azure.spring.identity.TokenCredentialClientBuilderCustomizer;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,6 +42,8 @@ import java.util.Optional;
 @AutoConfigureAfter(AzureDefaultTokenCredentialAutoConfiguration.class)
 public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     private final CosmosProperties cosmosProperties;
+    private final static String COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "cosmosChainedTokenCredential";
+    private final static String COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME = "cosmosAzureKeyCredential";
 
     public CosmosAutoConfiguration(CosmosProperties cosmosProperties) {
         this.cosmosProperties = cosmosProperties;
@@ -45,45 +54,87 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
         return cosmosProperties.getDatabase();
     }
 
-    @Bean
+    @Bean(COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME)
     @ConditionalOnMissingBean
-    public AzureKeyCredential azureKeyCredential() {
+    public AzureKeyCredential cosmosAzureKeyCredential() {
         return Optional.ofNullable(cosmosProperties.getKey())
                        .filter(StringUtils::hasText)
                        .map(AzureKeyCredential::new)
                        .orElse(null);
     }
 
+    @Bean(COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
+    @ConditionalOnMissingBean
+    public ChainedTokenCredential cosmosChainedTokenCredential(TokenCredential defaultTokenCredential) {
+        SpringMappingCredentialPropertiesProvider propertiesProvider = new SpringMappingCredentialPropertiesProvider(cosmosProperties);
+        final ChainedTokenCredentialBuilder chainedTokenCredentialBuilder = new ChainedTokenCredentialBuilder();
+        chainedTokenCredentialBuilder.addLast(propertiesProvider.mappingTokenCredential())
+                                     .addLast(defaultTokenCredential);
+        return chainedTokenCredentialBuilder.build();
+    }
+
     @Bean
     @ConditionalOnMissingBean
-    public CosmosClientBuilder cosmosClientBuilder(
-        ObjectProvider<AzureKeyCredential> azureKeyCredentials,
-        ObjectProvider<MappingCredentialPropertiesProvider> mappingPropertiesProviders,
-        ObjectProvider<TokenCredential> defaultTokenCredentials) {
-        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder()
-            .consistencyLevel(cosmosProperties.getConsistencyLevel())
-            .endpoint(cosmosProperties.getUri());
-        if (ConnectionMode.GATEWAY == cosmosProperties.getConnectionMode()) {
-            cosmosClientBuilder.gatewayMode();
-        }
-        AzureKeyCredential azureKeyCredential = azureKeyCredentials.getIfAvailable();
-        if (azureKeyCredential != null) {
-            return cosmosClientBuilder.credential(azureKeyCredential);
-        }
+    public ClientBuilderCustomizer<CosmosClientBuilder> cosmosClientBuilderCustomizers() {
+        ClientBuilderCustomizer<CosmosClientBuilder> clientBuilderCustomizer = builder -> {
+            builder.consistencyLevel(cosmosProperties.getConsistencyLevel())
+                    .endpoint(cosmosProperties.getUri());
+            if (ConnectionMode.GATEWAY == cosmosProperties.getConnectionMode()) {
+                builder.gatewayMode();
+            }
+        };
+        return clientBuilderCustomizer;
+    }
 
-        MappingCredentialPropertiesProvider propertiesProvider = mappingPropertiesProviders.orderedStream()
-                                                                                           .findFirst()
-                                                                                           .orElse(null);
-        if (propertiesProvider != null) {
-            return cosmosClientBuilder.credential(propertiesProvider.mappingTokenCredential());
+    @Bean
+    @ConditionalOnMissingBean
+    public AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer(
+        @Autowired(required = false) @Qualifier(COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME) AzureKeyCredential cosmosAzureKeyCredential) {
+        if (cosmosAzureKeyCredential != null) {
+            return (builder, callback) -> {
+                callback.skipCredential();
+                builder.credential(cosmosAzureKeyCredential);
+            };
         }
+        return null;
+    }
 
-        TokenCredential defaultTokenCredential = defaultTokenCredentials.orderedStream().findFirst().orElse(null);
-        if (defaultTokenCredential != null) {
-            return cosmosClientBuilder.credential(defaultTokenCredential);
-        }
+    @Bean
+    @ConditionalOnMissingBean
+    public TokenCredentialClientBuilderCustomizer<CosmosClientBuilder> tokenCredentialCustomizer(
+        @Qualifier(COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME) ChainedTokenCredential cosmosChainedTokenCredential) {
+        return builder -> builder.credential(cosmosChainedTokenCredential);
+    }
 
-        throw new IllegalStateException("Not found any credential properties configured.");
+    /**
+     * Cosmos client builder configurer
+     * @param cosmosClientBuilderCustomizers Customize cosmos client builder.
+     * @param azureKeyCredentialCustomizers Customize key credential
+     * @param tokenCredentialCustomizers Customize token credential.
+     * @return Cosmos client builder configurer
+     */
+    @Bean
+    public CosmosClientBuilderConfigurer cosmosClientBuilderConfigurer(
+        ObjectProvider<ClientBuilderCustomizer<CosmosClientBuilder>> cosmosClientBuilderCustomizers,
+        ObjectProvider<AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder>> azureKeyCredentialCustomizers,
+        ObjectProvider<TokenCredentialClientBuilderCustomizer<CosmosClientBuilder>> tokenCredentialCustomizers) {
+        CosmosClientBuilderConfigurer configurer = new CosmosClientBuilderConfigurer();
+        configurer.setClientBuilderCustomizer(cosmosClientBuilderCustomizers.orderedStream().findFirst().get());
+        configurer.setAzureKeyCredentialCustomizer(azureKeyCredentialCustomizers.orderedStream().findFirst().orElse(null));
+        configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().get());
+        return configurer;
+    }
+
+    /**
+     * Create default CosmosClientBuilder
+     * @param cosmosClientBuilderConfigurer Cosmos client builder configurer bean.
+     * @return Default CosmosClientBuilder
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public CosmosClientBuilder cosmosClientBuilderCustomizer(CosmosClientBuilderConfigurer cosmosClientBuilderConfigurer) {
+        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder();
+        return cosmosClientBuilderConfigurer.configure(cosmosClientBuilder);
     }
 
     @Override

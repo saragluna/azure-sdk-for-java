@@ -3,6 +3,7 @@
 
 package com.azure.spring.cloud.autoconfigure.eventhub;
 
+import com.azure.spring.autoconfigure.unity.AzureProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,7 +14,7 @@ import javax.validation.constraints.Pattern;
  */
 @Validated
 @ConfigurationProperties("spring.cloud.azure.eventhub")
-public class AzureEventHubProperties {
+public class AzureEventHubProperties extends AzureProperties {
 
     private String namespace;
 

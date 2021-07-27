@@ -7,6 +7,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientCertificateCredential;
 import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ManagedIdentityCredential;
+import com.azure.spring.autoconfigure.unity.AzureProperties;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,10 +148,10 @@ public class KeyVaultEnvironmentPostProcessorTest {
 
         keyVaultEnvironmentPostProcessorHelper = new KeyVaultEnvironmentPostProcessorHelper(environment);
 
-        final TokenCredential credentials = keyVaultEnvironmentPostProcessorHelper.getCredentials("myvault");
+        final TokenCredential credentials = keyVaultEnvironmentPostProcessorHelper.getCredentials(AzureProperties.PREFIX, "myvault");
         assertThat(credentials, IsInstanceOf.instanceOf(ClientSecretCredential.class));
 
-        final TokenCredential credentials2 = keyVaultEnvironmentPostProcessorHelper.getCredentials("myvault2");
+        final TokenCredential credentials2 = keyVaultEnvironmentPostProcessorHelper.getCredentials(AzureProperties.PREFIX, "myvault2");
         assertThat(credentials2, IsInstanceOf.instanceOf(ClientSecretCredential.class));
     }
 

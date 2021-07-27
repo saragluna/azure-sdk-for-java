@@ -10,7 +10,6 @@ import com.azure.spring.autoconfigure.unity.AzurePropertyAutoConfiguration;
 import com.azure.spring.data.cosmos.config.CosmosConfig;
 import com.azure.spring.data.cosmos.core.CosmosTemplate;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -80,8 +79,8 @@ public class CosmosAutoConfigurationTest {
     @Configuration(proxyBeanMethods = false)
     static class ConfigurationWithMockCosmosAsyncClient extends CosmosAutoConfiguration {
 
-        ConfigurationWithMockCosmosAsyncClient(CosmosProperties cosmosProperties, @Qualifier(AZURE_PROPERTY_BEAN_NAME)AzureProperties azureProperties) {
-            super(cosmosProperties, azureProperties);
+        ConfigurationWithMockCosmosAsyncClient(CosmosProperties cosmosProperties) {
+            super(cosmosProperties);
         }
 
         @Override

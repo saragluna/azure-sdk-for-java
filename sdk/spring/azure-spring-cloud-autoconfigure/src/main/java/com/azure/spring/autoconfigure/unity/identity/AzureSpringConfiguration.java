@@ -17,11 +17,13 @@ public class AzureSpringConfiguration extends Configuration implements Credentia
 
     public AzureSpringConfiguration(AzureProperties azureProperties) {
         this.configuration = Configuration.getGlobalConfiguration().clone();
-        overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_TENANT_ID, azureProperties.getCredential().getTenantId());
-        overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_CLIENT_ID, azureProperties.getCredential().getClientId());
-        overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_CLIENT_SECRET, azureProperties.getCredential().getClientSecret());
-        overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_CLIENT_CERTIFICATE_PATH, azureProperties.getCredential().getCertificatePath());
-        overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_AUTHORITY_HOST, azureProperties.getEnvironment().getAuthorityHost());
+        if (azureProperties.getCredential() != null) {
+            overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_TENANT_ID, azureProperties.getCredential().getTenantId());
+            overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_CLIENT_ID, azureProperties.getCredential().getClientId());
+            overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_CLIENT_SECRET, azureProperties.getCredential().getClientSecret());
+            overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_CLIENT_CERTIFICATE_PATH, azureProperties.getCredential().getCertificatePath());
+            overridePropertyIfApplicable(Configuration.PROPERTY_AZURE_AUTHORITY_HOST, azureProperties.getEnvironment().getAuthorityHost());
+        }
     }
 
     private void overridePropertyIfApplicable(String key, String value) {
@@ -63,5 +65,10 @@ public class AzureSpringConfiguration extends Configuration implements Credentia
     @Override
     public String getAuthorityHost() {
         return this.configuration.get(Configuration.PROPERTY_AZURE_AUTHORITY_HOST);
+    }
+
+    @Override
+    public String getCertificatePassword() {
+        return null;
     }
 }

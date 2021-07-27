@@ -134,8 +134,11 @@ class KeyVaultEnvironmentPostProcessorHelper {
      * @return the token credentials.
      */
     public TokenCredential getOrDefaultCredentials(String normalizedName) {
-        return Optional.ofNullable(getCredentials(KeyVaultProperties.PREFIX, normalizedName))
-                       .or(() -> Optional.ofNullable(getCredentials(AzureProperties.PREFIX, normalizedName)))
+        TokenCredential tokenCredential = getCredentials(KeyVaultProperties.PREFIX, normalizedName);
+        if (tokenCredential != null) {
+            return tokenCredential;
+        }
+        return Optional.ofNullable(getCredentials(AzureProperties.PREFIX, normalizedName))
                        .orElse(new ManagedIdentityCredentialBuilder().build());
     }
 

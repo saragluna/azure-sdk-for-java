@@ -4,7 +4,6 @@
 package com.azure.spring.cloud.autoconfigure.storage;
 
 import com.azure.spring.autoconfigure.unity.AzureProperties;
-import com.azure.spring.autoconfigure.unity.SpringAzureProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -15,7 +14,7 @@ import javax.validation.constraints.Pattern;
  */
 @Validated
 @ConfigurationProperties("spring.cloud.azure.storage")
-public class AzureStorageProperties extends AzureProperties implements SpringAzureProperties {
+public class AzureStorageProperties extends AzureProperties {
 
 //    @NotEmpty
     @Pattern(regexp = "^[a-z0-9]{3,24}$",

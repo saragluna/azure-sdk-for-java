@@ -17,7 +17,6 @@ import com.azure.spring.identity.SpringManagedIdentityCredentialBuilder;
 import com.azure.spring.identity.SpringVisualStudioCodeCredentialBuilder;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -28,7 +27,6 @@ import java.util.List;
  * Auto-configuration for Azure Spring default token credential.
  */
 @Configuration
-@ConditionalOnProperty(name = AzureProperties.PREFIX)
 public class AzureDefaultTokenCredentialAutoConfiguration {
 
     public static final int SPRING_ENV_CREDENTIAL_ORDER = 0;
@@ -90,12 +88,6 @@ public class AzureDefaultTokenCredentialAutoConfiguration {
             chainedTokenCredentialBuilder.addLast(builder.build());
         }
         return chainedTokenCredentialBuilder.build();
-    }
-
-    @Bean
-    public MappingCredentialPropertiesProvider cosmosCredentialPropertiesProvider(
-        ObjectProvider<SpringAzureProperties> springProperties) {
-        return new SpringMappingCredentialPropertiesProvider((AzureProperties) springProperties.getIfAvailable());
     }
 
     /*@Bean

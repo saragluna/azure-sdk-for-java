@@ -12,6 +12,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import static com.azure.spring.autoconfigure.cosmos.CosmosProperties.PREFIX;
+
 /**
  * Import {@link CosmosRepositoriesAutoConfigureRegistrar} class as a Bean in Spring.
  */
@@ -19,7 +21,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnClass({ CosmosRepository.class })
 @ConditionalOnMissingBean({ CosmosRepositoryFactoryBean.class,
     CosmosRepositoryConfigurationExtension.class })
-@ConditionalOnProperty(prefix = "azure.cosmos.repositories",
+@ConditionalOnProperty(prefix = PREFIX + ".repositories",
         name = "enabled",
         havingValue = "true",
         matchIfMissing = true)

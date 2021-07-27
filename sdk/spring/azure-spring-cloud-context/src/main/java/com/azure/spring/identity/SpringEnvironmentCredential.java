@@ -26,7 +26,7 @@ public class SpringEnvironmentCredential implements TokenCredential {
     private final CredentialPropertiesProvider credentialPropertiesProvider;
     private final TokenCredential tokenCredential;
 
-    SpringEnvironmentCredential(CredentialPropertiesProvider credentialPropertiesProvider,
+    public SpringEnvironmentCredential(CredentialPropertiesProvider credentialPropertiesProvider,
                                 IdentityClientOptions identityClientOptions) {
         this.credentialPropertiesProvider = credentialPropertiesProvider;
         this.tokenCredential = populateTokenCredential(identityClientOptions);

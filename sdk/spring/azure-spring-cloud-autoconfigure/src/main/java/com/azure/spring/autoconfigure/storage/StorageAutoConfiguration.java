@@ -5,15 +5,21 @@ package com.azure.spring.autoconfigure.storage;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.policy.HttpLogOptions;
-import com.azure.spring.MappingCredentialPropertiesProvider;
+import com.azure.core.util.ClientOptions;
+import com.azure.identity.ChainedTokenCredential;
+import com.azure.identity.ChainedTokenCredentialBuilder;
+import com.azure.spring.SpringMappingCredentialPropertiesProvider;
 import com.azure.spring.autoconfigure.storage.resource.AzureStorageProtocolResolver;
 import com.azure.spring.autoconfigure.unity.identity.AzureDefaultTokenCredentialAutoConfiguration;
-import com.azure.spring.identity.SpringEnvironmentCredential;
-import com.azure.spring.identity.SpringEnvironmentCredentialBuilder;
+import com.azure.spring.identity.ClientBuilderCustomizer;
+import com.azure.spring.identity.SharedKeyCredentialClientBuilderCustomizer;
+import com.azure.spring.identity.TokenCredentialClientBuilderCustomizer;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.common.StorageSharedKeyCredential;
 import com.azure.storage.file.share.ShareServiceClientBuilder;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -23,7 +29,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.util.StringUtils;
 
 import static com.azure.spring.core.ApplicationId.AZURE_SPRING_STORAGE_BLOB;
 import static com.azure.spring.core.ApplicationId.AZURE_SPRING_STORAGE_FILES;
@@ -41,45 +46,86 @@ import static com.azure.spring.core.ApplicationId.VERSION;
 @AutoConfigureAfter(AzureDefaultTokenCredentialAutoConfiguration.class)
 public class StorageAutoConfiguration {
 
-    private final SpringEnvironmentCredentialBuilder environmentCredentialBuilder;
+    private final StorageProperties storageProperties;
+    private final static String STORAGE_BLOB_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "storageBlobChainedTokenCredential";
+    private final static String STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME = "storageBlobSharedKeyCredential";
 
-    private final TokenCredential defaultTokenCredential;
-
-    public StorageAutoConfiguration(SpringEnvironmentCredentialBuilder environmentCredentialBuilder,
-                                    TokenCredential defaultTokenCredential) {
-        this.environmentCredentialBuilder = environmentCredentialBuilder;
-        this.defaultTokenCredential = defaultTokenCredential;
+    public StorageAutoConfiguration(StorageProperties storageProperties) {
+        this.storageProperties = storageProperties;
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> blobShareKeyCredentialCustomizer(
+        @Autowired(required = false) @Qualifier(STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME) StorageSharedKeyCredential sharedKeyCredential) {
+        if (sharedKeyCredential != null) {
+            return (builder, callback) -> {
+                callback.skipCredential();
+                builder.credential(sharedKeyCredential);
+            };
+        }
+        return null;
+    }
+
+    @Bean(STORAGE_BLOB_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
+    @ConditionalOnMissingBean
+    public ChainedTokenCredential storageBlobChainedTokenCredential(StorageProperties storageProperties,
+                                                                TokenCredential defaultTokenCredential) {
+        SpringMappingCredentialPropertiesProvider propertiesProvider = new SpringMappingCredentialPropertiesProvider(storageProperties);
+        final ChainedTokenCredentialBuilder chainedTokenCredentialBuilder = new ChainedTokenCredentialBuilder();
+        chainedTokenCredentialBuilder.addLast(propertiesProvider.mappingTokenCredential())
+                                     .addLast(defaultTokenCredential);
+        return chainedTokenCredentialBuilder.build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ClientBuilderCustomizer<BlobServiceClientBuilder> storageBlobClientBuilderCustomizers() {
+        ClientBuilderCustomizer<BlobServiceClientBuilder> clientBuilderCustomizer = builder -> {
+            builder.endpoint(storageProperties.getBlobEndpoint())
+                   .clientOptions(new ClientOptions().setApplicationId(AZURE_SPRING_STORAGE_BLOB + VERSION));
+        };
+        return clientBuilderCustomizer;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TokenCredentialClientBuilderCustomizer<BlobServiceClientBuilder> storageBlobTokenCredentialCustomizer(
+        @Qualifier(STORAGE_BLOB_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME) ChainedTokenCredential storageBlobChainedTokenCredential) {
+        return builder -> builder.credential(storageBlobChainedTokenCredential);
+    }
+
+    /**
+     * Storage Blob client builder configurer
+     * @param storageBlobClientBuilderCustomizers Customize cosmos client builder.
+     * @param storageBlobClientBuilderCustomizers Customize shared key credential
+     * @param tokenCredentialCustomizers Customize token credential.
+     * @return Cosmos client builder configurer
+     */
+    @Bean
+    public StorageBlobServiceClientBuilderConfigurer storageBlobClientBuilderConfigurer(
+        ObjectProvider<ClientBuilderCustomizer<BlobServiceClientBuilder>> storageBlobClientBuilderCustomizers,
+        ObjectProvider<SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder>> sharedKeyCredentialCustomizers,
+        ObjectProvider<TokenCredentialClientBuilderCustomizer<BlobServiceClientBuilder>> tokenCredentialCustomizers) {
+        StorageBlobServiceClientBuilderConfigurer configurer = new StorageBlobServiceClientBuilderConfigurer();
+        configurer.setClientBuilderCustomizer(storageBlobClientBuilderCustomizers.orderedStream().findFirst().get());
+        configurer.setShareKeyCredentialCustomizer(sharedKeyCredentialCustomizers.orderedStream().findFirst().orElse(null));
+        configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().get());
+        return configurer;
+    }
+
+    /**
+     * Create BlobServiceClientBuilder
+     * @param storageBlobClientBuilderConfigurer Configurer blob service cleint with all the customizer
+     * @return Default BlobServiceClientBuilder
+     */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty("azure.storage.blob-endpoint")
     public BlobServiceClientBuilder blobServiceClientBuilder(
-        StorageProperties storageProperties,
-        ObjectProvider<MappingCredentialPropertiesProvider> mappingPropertiesProviders,
-        ObjectProvider<TokenCredential> defaultTokenCredentials) {
-        final String accountName = storageProperties.getAccountName();
-        final String accountKey = storageProperties.getAccountKey();
-        BlobServiceClientBuilder serviceClientBuilder = new BlobServiceClientBuilder()
-            .endpoint(storageProperties.getBlobEndpoint())
-            .httpLogOptions(new HttpLogOptions().setApplicationId(AZURE_SPRING_STORAGE_BLOB + VERSION));
-        if (StringUtils.hasText(accountName)
-            && StringUtils.hasText(accountKey)) {
-            return serviceClientBuilder.credential(new StorageSharedKeyCredential(accountName, accountKey));
-        }
-
-        MappingCredentialPropertiesProvider propertiesProvider = mappingPropertiesProviders.orderedStream()
-                                                                                           .findFirst()
-                                                                                           .orElse(null);
-        if (propertiesProvider != null) {
-            return serviceClientBuilder.credential(propertiesProvider.mappingTokenCredential());
-        }
-
-        TokenCredential defaultTokenCredential = defaultTokenCredentials.orderedStream().findFirst().orElse(null);
-        if (defaultTokenCredential != null) {
-            return serviceClientBuilder.credential(defaultTokenCredential);
-        }
-
-        throw new IllegalStateException("Not found any credential properties configured.");
+        StorageBlobServiceClientBuilderConfigurer storageBlobClientBuilderConfigurer) {
+        BlobServiceClientBuilder serviceClientBuilder = new BlobServiceClientBuilder();
+        return storageBlobClientBuilderConfigurer.configure(serviceClientBuilder);
     }
 
     @Bean

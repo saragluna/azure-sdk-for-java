@@ -4,7 +4,6 @@
 package com.azure.spring.autoconfigure.storage;
 
 import com.azure.spring.autoconfigure.unity.AzureProperties;
-import com.azure.spring.autoconfigure.unity.SpringAzureProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -15,7 +14,7 @@ import javax.validation.constraints.Pattern;
  */
 @Validated
 @ConfigurationProperties(StorageProperties.PREFIX)
-public class StorageProperties extends AzureProperties implements SpringAzureProperties {
+public class StorageProperties extends AzureProperties {
 
     public static final String PREFIX = "spring.cloud.azure.storage";
 

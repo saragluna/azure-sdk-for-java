@@ -16,6 +16,9 @@ public interface CredentialPropertiesProvider {
 
     String getClientCertificatePath();
 
+    // TODO (moaryc) Check
+    String getCertificatePassword();
+
     String getUsername();
 
     String getPassword();

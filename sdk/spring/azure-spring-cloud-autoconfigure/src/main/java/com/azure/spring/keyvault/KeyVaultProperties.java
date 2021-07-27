@@ -4,7 +4,6 @@
 package com.azure.spring.keyvault;
 
 import com.azure.spring.autoconfigure.unity.AzureProperties;
-import com.azure.spring.autoconfigure.unity.SpringAzureProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,7 +17,7 @@ import java.util.stream.Stream;
  * KeyVaultProperties
  */
 @ConfigurationProperties(value = KeyVaultProperties.PREFIX)
-public class KeyVaultProperties extends AzureProperties implements SpringAzureProperties {
+public class KeyVaultProperties extends AzureProperties {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyVaultProperties.class);
 
