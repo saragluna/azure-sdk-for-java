@@ -30,6 +30,11 @@ public class AzureServiceBusJMSProperties extends AzureProperties {
 
     private String pricingTier;
 
+    public AzureServiceBusJMSProperties() {
+        super();
+        this.pricingTier = null;
+    }
+
     public String getConnectionString() {
         return connectionString;
     }

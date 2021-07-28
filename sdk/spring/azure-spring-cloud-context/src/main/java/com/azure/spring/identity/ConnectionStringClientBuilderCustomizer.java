@@ -6,8 +6,8 @@ package com.azure.spring.identity;
 /**
  * Customize connectionString for Azure SDK service client builder.
  */
-@FunctionalInterface
-public interface ConnectionStringClientBuilderCustomizer<T> {
+public interface ConnectionStringClientBuilderCustomizer<ClientBuilderType> {
 
-    void connectionString(T clientBuilder, AbstractClientBuilderConfigurer.SkipCredentialCallback callback);
+    void connectionString(ClientBuilderType clientBuilder,
+                          AbstractClientBuilderConfigurer<?, ClientBuilderType>.SkipCredentialCallback callback);
 }

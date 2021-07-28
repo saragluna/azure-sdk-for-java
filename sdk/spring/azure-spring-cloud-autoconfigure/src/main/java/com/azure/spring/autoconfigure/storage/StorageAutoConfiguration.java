@@ -47,8 +47,8 @@ import static com.azure.spring.core.ApplicationId.VERSION;
 public class StorageAutoConfiguration {
 
     private final StorageProperties storageProperties;
-    private final static String STORAGE_BLOB_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "storageBlobChainedTokenCredential";
-    private final static String STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME = "storageBlobSharedKeyCredential";
+    private static final String STORAGE_BLOB_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "storageBlobChainedTokenCredential";
+    private static final String STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME = "storageBlobSharedKeyCredential";
 
     public StorageAutoConfiguration(StorageProperties storageProperties) {
         this.storageProperties = storageProperties;
@@ -98,7 +98,7 @@ public class StorageAutoConfiguration {
     /**
      * Storage Blob client builder configurer
      * @param storageBlobClientBuilderCustomizers Customize cosmos client builder.
-     * @param storageBlobClientBuilderCustomizers Customize shared key credential
+     * @param sharedKeyCredentialCustomizers Customize shared key credential
      * @param tokenCredentialCustomizers Customize token credential.
      * @return Cosmos client builder configurer
      */

@@ -87,7 +87,7 @@ public class KeyVaultOperation {
                         LOG.error("Error of terminating Timer", runtimeException);
                     }
                 }
-                timer = new Timer(true);
+                createDaemonTimer();
                 final TimerTask task = new TimerTask() {
                     @Override
                     public void run() {
@@ -97,6 +97,10 @@ public class KeyVaultOperation {
                 timer.scheduleAtFixedRate(task, refreshInMillis, refreshInMillis);
             }
         }
+    }
+
+    private static void createDaemonTimer() {
+        timer = new Timer(true);
     }
 
     /**

@@ -6,8 +6,8 @@ package com.azure.spring.identity;
 /**
  * Customize AzureKeyCredential for Azure SDK service client builder.
  */
-@FunctionalInterface
-public interface SharedKeyCredentialClientBuilderCustomizer<B> {
+public interface SharedKeyCredentialClientBuilderCustomizer<ClientBuilderType> {
 
-    void sharedKeyCredential(B builder, AbstractClientBuilderConfigurer.SkipCredentialCallback callback);
+    void sharedKeyCredential(ClientBuilderType builder,
+                             AbstractClientBuilderConfigurer<?, ClientBuilderType>.SkipCredentialCallback callback);
 }

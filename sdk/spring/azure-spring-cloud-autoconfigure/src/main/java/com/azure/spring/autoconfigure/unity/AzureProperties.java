@@ -16,6 +16,11 @@ public class AzureProperties {
 
     private EnvironmentProperties environment;
 
+    public AzureProperties() {
+        this.credential = null;
+        this.environment = null;
+    }
+
     public CredentialProperties getCredential() {
         return credential;
     }

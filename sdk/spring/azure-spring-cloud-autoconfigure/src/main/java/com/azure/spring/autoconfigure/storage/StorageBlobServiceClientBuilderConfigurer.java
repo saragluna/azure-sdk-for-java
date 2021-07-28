@@ -12,15 +12,20 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
  * Configurer for extending Azure Storage Blob service client builder configuration.
  */
 public class StorageBlobServiceClientBuilderConfigurer
-    extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer, BlobServiceClientBuilder> {
+    extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer<BlobServiceClientBuilder>, BlobServiceClientBuilder> {
 
-    private SharedKeyCredentialClientBuilderCustomizer shareKeyCredentialCustomizer;
+    private SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> shareKeyCredentialCustomizer;
 
-    public SharedKeyCredentialClientBuilderCustomizer getShareKeyCredentialCustomizer() {
+    public StorageBlobServiceClientBuilderConfigurer() {
+        super();
+        this.shareKeyCredentialCustomizer = null;
+    }
+
+    public SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> getShareKeyCredentialCustomizer() {
         return shareKeyCredentialCustomizer;
     }
 
-    public void setShareKeyCredentialCustomizer(SharedKeyCredentialClientBuilderCustomizer shareKeyCredentialCustomizer) {
+    public void setShareKeyCredentialCustomizer(SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> shareKeyCredentialCustomizer) {
         this.shareKeyCredentialCustomizer = shareKeyCredentialCustomizer;
     }
 

@@ -6,25 +6,32 @@ package com.azure.spring.identity;
 /**
  * Configurer for extending Azure service client builder configuration.
  */
-public abstract class AbstractClientBuilderConfigurer<C extends ClientBuilderCustomizer, B> {
+public abstract class AbstractClientBuilderConfigurer
+    <ClientBuilderCustomizerType extends ClientBuilderCustomizer<ClientBuilderType>, ClientBuilderType> {
 
-    private TokenCredentialClientBuilderCustomizer tokenCredentialCustomizer;
+    private TokenCredentialClientBuilderCustomizer<ClientBuilderType> tokenCredentialCustomizer;
 
-    private C clientBuilderCustomizer;
+    private ClientBuilderCustomizerType clientBuilderCustomizer;
 
     private boolean skipCredential;
 
-    public B configure(B builder) {
+    public AbstractClientBuilderConfigurer() {
+        this.clientBuilderCustomizer = null;
+        this.tokenCredentialCustomizer = null;
+        this.skipCredential = false;
+    }
+
+    public ClientBuilderType configure(ClientBuilderType builder) {
         clientBuilderCustomizer.customize(builder);
         return builder;
     }
 
-    public B configureClientBuilder(B builder) {
+    public ClientBuilderType configureClientBuilder(ClientBuilderType builder) {
         clientBuilderCustomizer.customize(builder);
         return builder;
     }
 
-    public B configureTokenCredential(B builder) {
+    public ClientBuilderType configureTokenCredential(ClientBuilderType builder) {
         if (!skipCredential) {
             tokenCredentialCustomizer.tokenCredential(builder);
         }
@@ -39,22 +46,25 @@ public abstract class AbstractClientBuilderConfigurer<C extends ClientBuilderCus
         this.skipCredential = skipCredential;
     }
 
-    public TokenCredentialClientBuilderCustomizer getTokenCredentialCustomizer() {
+    public TokenCredentialClientBuilderCustomizer<ClientBuilderType> getTokenCredentialCustomizer() {
         return tokenCredentialCustomizer;
     }
 
-    public void setTokenCredentialCustomizer(TokenCredentialClientBuilderCustomizer tokenCredentialCustomizer) {
+    public void setTokenCredentialCustomizer(TokenCredentialClientBuilderCustomizer<ClientBuilderType> tokenCredentialCustomizer) {
         this.tokenCredentialCustomizer = tokenCredentialCustomizer;
     }
 
-    public C getClientBuilderCustomizer() {
+    public ClientBuilderCustomizerType getClientBuilderCustomizer() {
         return clientBuilderCustomizer;
     }
 
-    public void setClientBuilderCustomizer(C clientBuilderCustomizer) {
+    public void setClientBuilderCustomizer(ClientBuilderCustomizerType clientBuilderCustomizer) {
         this.clientBuilderCustomizer = clientBuilderCustomizer;
     }
 
+    /**
+     * SkipCredentialCallback
+     */
     public class SkipCredentialCallback {
         public void skipCredential() {
             setSkipCredential(true);

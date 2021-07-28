@@ -42,8 +42,8 @@ import java.util.Optional;
 @AutoConfigureAfter(AzureDefaultTokenCredentialAutoConfiguration.class)
 public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     private final CosmosProperties cosmosProperties;
-    private final static String COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "cosmosChainedTokenCredential";
-    private final static String COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME = "cosmosAzureKeyCredential";
+    private static final String COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "cosmosChainedTokenCredential";
+    private static final String COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME = "cosmosAzureKeyCredential";
 
     public CosmosAutoConfiguration(CosmosProperties cosmosProperties) {
         this.cosmosProperties = cosmosProperties;

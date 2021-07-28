@@ -46,8 +46,8 @@ import static com.azure.spring.core.ApplicationId.VERSION;
 @EnableConfigurationProperties(AzureStorageProperties.class)
 public class AzureStorageQueueAutoConfiguration {
 
-    private final static String STORAGE_QUEUE_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "storageQueueChainedTokenCredential";
-    private final static String STORAGE_QUEUE_SHARED_KEY_CREDENTIAL_BEAN_NAME = "storageQueueSharedKeyCredential";
+    private static final String STORAGE_QUEUE_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "storageQueueChainedTokenCredential";
+    private static final String STORAGE_QUEUE_SHARED_KEY_CREDENTIAL_BEAN_NAME = "storageQueueSharedKeyCredential";
 
     private final AzureStorageProperties azureStorageProperties;
 

@@ -11,15 +11,16 @@ import com.azure.spring.identity.ClientBuilderCustomizer;
 /**
  * Configurer for extending Azure Cosmos service client builder configuration.
  */
-public class CosmosClientBuilderConfigurer extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer, CosmosClientBuilder> {
+public class CosmosClientBuilderConfigurer
+    extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer<CosmosClientBuilder>, CosmosClientBuilder> {
 
-    private AzureKeyCredentialClientBuilderCustomizer azureKeyCredentialCustomizer;
+    private AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer;
 
-    public AzureKeyCredentialClientBuilderCustomizer getAzureKeyCredentialCustomizer() {
+    public AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> getAzureKeyCredentialCustomizer() {
         return azureKeyCredentialCustomizer;
     }
 
-    public void setAzureKeyCredentialCustomizer(AzureKeyCredentialClientBuilderCustomizer azureKeyCredentialCustomizer) {
+    public void setAzureKeyCredentialCustomizer(AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer) {
         this.azureKeyCredentialCustomizer = azureKeyCredentialCustomizer;
     }
 

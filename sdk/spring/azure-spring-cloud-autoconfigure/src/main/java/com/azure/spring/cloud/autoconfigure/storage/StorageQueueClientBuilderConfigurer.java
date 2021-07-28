@@ -12,25 +12,31 @@ import com.azure.storage.queue.QueueClientBuilder;
 /**
  * Configurer for extending Azure Storage Queue service client builder configuration.
  */
-public class StorageQueueClientBuilderConfigurer extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer, QueueClientBuilder> {
+public class StorageQueueClientBuilderConfigurer
+    extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer<QueueClientBuilder>, QueueClientBuilder> {
 
-    private SharedKeyCredentialClientBuilderCustomizer shareKeyCredentialCustomizer;
+    private SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> shareKeyCredentialCustomizer;
 
-    private ConnectionStringClientBuilderCustomizer connectionStringClientBuilderCustomizer;
+    private ConnectionStringClientBuilderCustomizer<QueueClientBuilder> connectionStringClientBuilderCustomizer;
 
-    public SharedKeyCredentialClientBuilderCustomizer getShareKeyCredentialCustomizer() {
+    public StorageQueueClientBuilderConfigurer() {
+        this.connectionStringClientBuilderCustomizer = null;
+        this.shareKeyCredentialCustomizer = null;
+    }
+
+    public SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> getShareKeyCredentialCustomizer() {
         return shareKeyCredentialCustomizer;
     }
 
-    public void setShareKeyCredentialCustomizer(SharedKeyCredentialClientBuilderCustomizer shareKeyCredentialCustomizer) {
+    public void setShareKeyCredentialCustomizer(SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> shareKeyCredentialCustomizer) {
         this.shareKeyCredentialCustomizer = shareKeyCredentialCustomizer;
     }
 
-    public ConnectionStringClientBuilderCustomizer getConnectionStringClientBuilderCustomizer() {
+    public ConnectionStringClientBuilderCustomizer<QueueClientBuilder> getConnectionStringClientBuilderCustomizer() {
         return connectionStringClientBuilderCustomizer;
     }
 
-    public void setConnectionStringClientBuilderCustomizer(ConnectionStringClientBuilderCustomizer connectionStringClientBuilderCustomizer) {
+    public void setConnectionStringClientBuilderCustomizer(ConnectionStringClientBuilderCustomizer<QueueClientBuilder> connectionStringClientBuilderCustomizer) {
         this.connectionStringClientBuilderCustomizer = connectionStringClientBuilderCustomizer;
     }
 
