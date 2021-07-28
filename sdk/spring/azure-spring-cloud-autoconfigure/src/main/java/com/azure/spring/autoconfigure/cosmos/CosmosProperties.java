@@ -34,7 +34,6 @@ public class CosmosProperties extends AzureProperties {
     /**
      * Document DB key.
      */
-    @NotEmpty
     private String key;
 
     /**

@@ -57,8 +57,7 @@ public class SpringEnvironmentCredential implements TokenCredential {
             final ClientSecretCredentialBuilder builder = new ClientSecretCredentialBuilder()
                                                               .tenantId(tenantId)
                                                               .clientId(clientId)
-                                                              .clientSecret(clientSecret)
-                                                              .authorityHost(authorityHost);
+                                                              .clientSecret(clientSecret);
             configureIdentityOptions(builder, identityClientOptions);
             return builder.build();
         }

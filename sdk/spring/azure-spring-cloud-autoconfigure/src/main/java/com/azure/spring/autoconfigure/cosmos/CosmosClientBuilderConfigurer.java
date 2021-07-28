@@ -26,7 +26,9 @@ public class CosmosClientBuilderConfigurer extends AbstractClientBuilderConfigur
     @Override
     public CosmosClientBuilder configure(CosmosClientBuilder builder) {
         configureClientBuilder(builder);
-        azureKeyCredentialCustomizer.keyCredential(builder, new SkipCredentialCallback());
+        if (azureKeyCredentialCustomizer != null) {
+            azureKeyCredentialCustomizer.keyCredential(builder, new SkipCredentialCallback());
+        }
         configureTokenCredential(builder);
         return builder;
     }

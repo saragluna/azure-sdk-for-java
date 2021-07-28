@@ -77,6 +77,6 @@ public class SpringMappingCredentialPropertiesProvider implements MappingCredent
 
     @Override
     public String getAuthorityHost() {
-        return null;
+        return Optional.ofNullable(environment).map(EnvironmentProperties::getAuthorityHost).orElse(null);
     }
 }

@@ -78,7 +78,7 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     public ClientBuilderCustomizer<CosmosClientBuilder> cosmosClientBuilderCustomizers() {
         ClientBuilderCustomizer<CosmosClientBuilder> clientBuilderCustomizer = builder -> {
             builder.consistencyLevel(cosmosProperties.getConsistencyLevel())
-                    .endpoint(cosmosProperties.getUri());
+                   .endpoint(cosmosProperties.getUri());
             if (ConnectionMode.GATEWAY == cosmosProperties.getConnectionMode()) {
                 builder.gatewayMode();
             }
