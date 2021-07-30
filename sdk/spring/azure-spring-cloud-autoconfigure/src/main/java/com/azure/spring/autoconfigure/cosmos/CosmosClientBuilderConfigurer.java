@@ -7,6 +7,7 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.spring.identity.AbstractClientBuilderConfigurer;
 import com.azure.spring.identity.AzureKeyCredentialClientBuilderCustomizer;
 import com.azure.spring.identity.ClientBuilderCustomizer;
+import com.azure.spring.identity.DefaultSkipCredentialCallback;
 
 /**
  * Configurer for extending Azure Cosmos service client builder configuration.
@@ -16,10 +17,6 @@ public class CosmosClientBuilderConfigurer
 
     private AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer;
 
-    public AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> getAzureKeyCredentialCustomizer() {
-        return azureKeyCredentialCustomizer;
-    }
-
     public void setAzureKeyCredentialCustomizer(AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer) {
         this.azureKeyCredentialCustomizer = azureKeyCredentialCustomizer;
     }
@@ -28,7 +25,8 @@ public class CosmosClientBuilderConfigurer
     public CosmosClientBuilder configure(CosmosClientBuilder builder) {
         configureClientBuilder(builder);
         if (azureKeyCredentialCustomizer != null) {
-            azureKeyCredentialCustomizer.keyCredential(builder, new SkipCredentialCallback());
+            azureKeyCredentialCustomizer.keyCredential(builder,
+                new DefaultSkipCredentialCallback<>(this));
         }
         configureTokenCredential(builder);
         return builder;

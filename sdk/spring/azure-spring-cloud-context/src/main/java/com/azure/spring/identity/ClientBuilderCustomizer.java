@@ -7,7 +7,7 @@ package com.azure.spring.identity;
  * Customize Azure SDK service client builder with basic properties setting.
  */
 @FunctionalInterface
-public interface ClientBuilderCustomizer<B> {
+public interface ClientBuilderCustomizer<ClientBuilderType> {
 
-    void customize(B builder);
+    void customize(ClientBuilderType builder);
 }

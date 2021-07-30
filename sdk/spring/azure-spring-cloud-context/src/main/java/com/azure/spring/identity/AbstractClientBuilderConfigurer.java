@@ -61,17 +61,4 @@ public abstract class AbstractClientBuilderConfigurer
     public void setClientBuilderCustomizer(ClientBuilderCustomizerType clientBuilderCustomizer) {
         this.clientBuilderCustomizer = clientBuilderCustomizer;
     }
-
-    /**
-     * SkipCredentialCallback
-     */
-    public class SkipCredentialCallback {
-        public void skipCredential() {
-            setSkipCredential(true);
-        }
-
-        public boolean isSkipCredential() {
-            return skipCredential;
-        }
-    }
 }

@@ -8,6 +8,5 @@ package com.azure.spring.identity;
  */
 public interface ConnectionStringClientBuilderCustomizer<ClientBuilderType> {
 
-    void connectionString(ClientBuilderType clientBuilder,
-                          AbstractClientBuilderConfigurer<?, ClientBuilderType>.SkipCredentialCallback callback);
+    void connectionString(ClientBuilderType clientBuilder, TokenCredentialCallback callback);
 }

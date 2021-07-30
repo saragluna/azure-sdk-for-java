@@ -54,6 +54,13 @@ public class StorageAutoConfiguration {
         this.storageProperties = storageProperties;
     }
 
+    @Bean(STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME)
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty("spring.cloud.azure.storage.account-key")
+    public StorageSharedKeyCredential storageSharedKeyCredential() {
+        return new StorageSharedKeyCredential(storageProperties.getAccountName(), storageProperties.getAccountKey());
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> blobShareKeyCredentialCustomizer(
@@ -121,7 +128,7 @@ public class StorageAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty("azure.storage.blob-endpoint")
+    @ConditionalOnProperty("spring.cloud.azure.storage.blob-endpoint")
     public BlobServiceClientBuilder blobServiceClientBuilder(
         StorageBlobServiceClientBuilderConfigurer storageBlobClientBuilderConfigurer) {
         BlobServiceClientBuilder serviceClientBuilder = new BlobServiceClientBuilder();
@@ -130,7 +137,7 @@ public class StorageAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty("azure.storage.file-endpoint")
+    @ConditionalOnProperty({"spring.cloud.azure.storage.file-endpoint", "spring.cloud.azure.storage.account-key"})
     public ShareServiceClientBuilder shareServiceClientBuilder(StorageProperties storageProperties) {
         final String accountName = storageProperties.getAccountName();
         final String accountKey = storageProperties.getAccountKey();

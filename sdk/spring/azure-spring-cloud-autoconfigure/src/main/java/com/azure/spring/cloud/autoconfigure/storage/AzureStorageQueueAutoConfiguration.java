@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,6 +58,7 @@ public class AzureStorageQueueAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty({"spring.cloud.azure.storage.access-key", "spring.cloud.azure.storage.account"})
     public ConnectionStringClientBuilderCustomizer<QueueClientBuilder> queueConnectionStringClientBuilderCustomizer(
         AzureStorageProperties storageProperties,
         ObjectProvider<AzureEnvironment> azureEnvironmentProvider,
@@ -70,7 +72,7 @@ public class AzureStorageQueueAutoConfiguration {
                     provider = new StorageConnectionStringProvider(storageAccountManager.getOrCreate(account));
                 } else {
                     final String accessKey = storageProperties.getAccessKey();
-                    AzureEnvironment azureEnvironment = azureEnvironmentProvider.getIfAvailable();
+                    AzureEnvironment azureEnvironment = azureEnvironmentProvider.getIfAvailable(()-> AzureEnvironment.AZURE);
                     if (azureEnvironment != null) {
                         provider = new StorageConnectionStringProvider(account, accessKey, azureEnvironment);
                     }
@@ -121,17 +123,20 @@ public class AzureStorageQueueAutoConfiguration {
 
     /**
      * Storage Queue client builder configurer
-     * @param clientBuilderCustomizers Customize queue client builder.
+     * @param connectionStringClientBuilderCustomizers Customize the connection string client builder
+     * @param clientBuilderCustomizers Customize queue client builder
      * @param sharedKeyCredentialCustomizers Customize shared key credential
      * @param tokenCredentialCustomizers Customize token credential.
      * @return Cosmos client builder configurer
      */
     @Bean
     public StorageQueueClientBuilderConfigurer storageQueueClientBuilderConfigurer(
+        ObjectProvider<ConnectionStringClientBuilderCustomizer<QueueClientBuilder>> connectionStringClientBuilderCustomizers,
         ObjectProvider<ClientBuilderCustomizer<QueueClientBuilder>> clientBuilderCustomizers,
         ObjectProvider<SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder>> sharedKeyCredentialCustomizers,
         ObjectProvider<TokenCredentialClientBuilderCustomizer<QueueClientBuilder>> tokenCredentialCustomizers) {
         StorageQueueClientBuilderConfigurer configurer = new StorageQueueClientBuilderConfigurer();
+        configurer.setConnectionStringClientBuilderCustomizer(connectionStringClientBuilderCustomizers.orderedStream().findFirst().orElse(null));
         configurer.setClientBuilderCustomizer(clientBuilderCustomizers.orderedStream().findFirst().get());
         configurer.setShareKeyCredentialCustomizer(sharedKeyCredentialCustomizers.orderedStream().findFirst().orElse(null));
         configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().get());
@@ -145,7 +150,7 @@ public class AzureStorageQueueAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public QueueClientBuilder blobServiceClientBuilder(StorageQueueClientBuilderConfigurer storageQueueClientBuilderConfigurer) {
+    public QueueClientBuilder queueServiceClientBuilder(StorageQueueClientBuilderConfigurer storageQueueClientBuilderConfigurer) {
         QueueClientBuilder serviceClientBuilder = new QueueClientBuilder();
         return storageQueueClientBuilderConfigurer.configure(serviceClientBuilder);
     }

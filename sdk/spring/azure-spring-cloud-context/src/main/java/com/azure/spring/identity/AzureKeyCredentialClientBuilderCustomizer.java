@@ -8,6 +8,5 @@ package com.azure.spring.identity;
  */
 public interface AzureKeyCredentialClientBuilderCustomizer<ClientBuilderType> {
 
-    void keyCredential(ClientBuilderType builder,
-                       AbstractClientBuilderConfigurer<?, ClientBuilderType>.SkipCredentialCallback callback);
+    void keyCredential(ClientBuilderType builder, TokenCredentialCallback callback);
 }

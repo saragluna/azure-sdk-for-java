@@ -7,6 +7,7 @@ import com.azure.spring.identity.AbstractClientBuilderConfigurer;
 import com.azure.spring.identity.ClientBuilderCustomizer;
 import com.azure.spring.identity.ConnectionStringClientBuilderCustomizer;
 import com.azure.spring.identity.SharedKeyCredentialClientBuilderCustomizer;
+import com.azure.spring.identity.DefaultSkipCredentialCallback;
 import com.azure.storage.queue.QueueClientBuilder;
 
 /**
@@ -15,25 +16,16 @@ import com.azure.storage.queue.QueueClientBuilder;
 public class StorageQueueClientBuilderConfigurer
     extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer<QueueClientBuilder>, QueueClientBuilder> {
 
-    private SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> shareKeyCredentialCustomizer;
-
     private ConnectionStringClientBuilderCustomizer<QueueClientBuilder> connectionStringClientBuilderCustomizer;
+    private SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> shareKeyCredentialCustomizer;
 
     public StorageQueueClientBuilderConfigurer() {
         this.connectionStringClientBuilderCustomizer = null;
         this.shareKeyCredentialCustomizer = null;
     }
 
-    public SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> getShareKeyCredentialCustomizer() {
-        return shareKeyCredentialCustomizer;
-    }
-
     public void setShareKeyCredentialCustomizer(SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> shareKeyCredentialCustomizer) {
         this.shareKeyCredentialCustomizer = shareKeyCredentialCustomizer;
-    }
-
-    public ConnectionStringClientBuilderCustomizer<QueueClientBuilder> getConnectionStringClientBuilderCustomizer() {
-        return connectionStringClientBuilderCustomizer;
     }
 
     public void setConnectionStringClientBuilderCustomizer(ConnectionStringClientBuilderCustomizer<QueueClientBuilder> connectionStringClientBuilderCustomizer) {
@@ -42,12 +34,14 @@ public class StorageQueueClientBuilderConfigurer
 
     @Override
     public QueueClientBuilder configure(QueueClientBuilder builder) {
-        SkipCredentialCallback credentialCallback = new SkipCredentialCallback();
-        connectionStringClientBuilderCustomizer.connectionString(builder, credentialCallback);
-        if (!credentialCallback.isSkipCredential()) {
-            shareKeyCredentialCustomizer.sharedKeyCredential(builder, credentialCallback);
-            configureTokenCredential(builder);
+        DefaultSkipCredentialCallback<StorageQueueClientBuilderConfigurer> credentialCallback = new DefaultSkipCredentialCallback<>(this);
+        if (connectionStringClientBuilderCustomizer != null) {
+            connectionStringClientBuilderCustomizer.connectionString(builder, credentialCallback);
         }
+        if (!credentialCallback.isSkipCredential() && shareKeyCredentialCustomizer != null) {
+            shareKeyCredentialCustomizer.sharedKeyCredential(builder, credentialCallback);
+        }
+        configureTokenCredential(builder);
         return builder;
     }
 }
