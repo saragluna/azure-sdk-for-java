@@ -16,7 +16,6 @@ import com.azure.spring.data.cosmos.config.AbstractCosmosConfiguration;
 import com.azure.spring.data.cosmos.config.CosmosConfig;
 import com.azure.spring.data.cosmos.core.CosmosTemplate;
 import com.azure.spring.identity.AzureKeyCredentialClientBuilderCustomizer;
-import com.azure.spring.identity.ClientBuilderCustomizer;
 import com.azure.spring.identity.TokenCredentialClientBuilderCustomizer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
+import static com.azure.spring.autoconfigure.unity.identity.AzureDefaultTokenCredentialAutoConfiguration.DEFAULT_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME;
+
 /**
  * Auto Configure Cosmos properties and connection policy.
  */
@@ -41,49 +42,37 @@ import java.util.Optional;
 @EnableConfigurationProperties(CosmosProperties.class)
 @AutoConfigureAfter(AzureDefaultTokenCredentialAutoConfiguration.class)
 public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
-    private final CosmosProperties cosmosProperties;
+    private final CosmosProperties properties;
     private static final String COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "cosmosChainedTokenCredential";
     private static final String COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME = "cosmosAzureKeyCredential";
 
-    public CosmosAutoConfiguration(CosmosProperties cosmosProperties) {
-        this.cosmosProperties = cosmosProperties;
+    public CosmosAutoConfiguration(CosmosProperties properties) {
+        this.properties = properties;
     }
 
     @Override
     protected String getDatabaseName() {
-        return cosmosProperties.getDatabase();
+        return properties.getDatabase();
     }
 
     @Bean(COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME)
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME)
     public AzureKeyCredential cosmosAzureKeyCredential() {
-        return Optional.ofNullable(cosmosProperties.getKey())
+        return Optional.ofNullable(properties.getKey())
                        .filter(StringUtils::hasText)
                        .map(AzureKeyCredential::new)
                        .orElse(null);
     }
 
     @Bean(COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
-    @ConditionalOnMissingBean
-    public ChainedTokenCredential cosmosChainedTokenCredential(TokenCredential defaultTokenCredential) {
-        SpringMappingCredentialPropertiesProvider propertiesProvider = new SpringMappingCredentialPropertiesProvider(cosmosProperties);
+    @ConditionalOnMissingBean(name = COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
+    public ChainedTokenCredential cosmosChainedTokenCredential(
+        @Qualifier(DEFAULT_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME) TokenCredential defaultTokenCredential) {
+        SpringMappingCredentialPropertiesProvider provider = new SpringMappingCredentialPropertiesProvider(properties);
         final ChainedTokenCredentialBuilder chainedTokenCredentialBuilder = new ChainedTokenCredentialBuilder();
-        chainedTokenCredentialBuilder.addLast(propertiesProvider.mappingTokenCredential())
+        chainedTokenCredentialBuilder.addLast(provider.mappingTokenCredential())
                                      .addLast(defaultTokenCredential);
         return chainedTokenCredentialBuilder.build();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ClientBuilderCustomizer<CosmosClientBuilder> cosmosClientBuilderCustomizers() {
-        ClientBuilderCustomizer<CosmosClientBuilder> clientBuilderCustomizer = builder -> {
-            builder.consistencyLevel(cosmosProperties.getConsistencyLevel())
-                   .endpoint(cosmosProperties.getUri());
-            if (ConnectionMode.GATEWAY == cosmosProperties.getConnectionMode()) {
-                builder.gatewayMode();
-            }
-        };
-        return clientBuilderCustomizer;
     }
 
     @Bean
@@ -91,10 +80,7 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     public AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer(
         @Autowired(required = false) @Qualifier(COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME) AzureKeyCredential cosmosAzureKeyCredential) {
         if (cosmosAzureKeyCredential != null) {
-            return (builder, callback) -> {
-                callback.skipCredential();
-                builder.credential(cosmosAzureKeyCredential);
-            };
+            return builder -> builder.credential(cosmosAzureKeyCredential);
         }
         return null;
     }
@@ -108,20 +94,17 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
 
     /**
      * Cosmos client builder configurer
-     * @param cosmosClientBuilderCustomizers Customize cosmos client builder.
      * @param azureKeyCredentialCustomizers Customize key credential
      * @param tokenCredentialCustomizers Customize token credential.
      * @return Cosmos client builder configurer
      */
     @Bean
     public CosmosClientBuilderConfigurer cosmosClientBuilderConfigurer(
-        ObjectProvider<ClientBuilderCustomizer<CosmosClientBuilder>> cosmosClientBuilderCustomizers,
         ObjectProvider<AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder>> azureKeyCredentialCustomizers,
         ObjectProvider<TokenCredentialClientBuilderCustomizer<CosmosClientBuilder>> tokenCredentialCustomizers) {
         CosmosClientBuilderConfigurer configurer = new CosmosClientBuilderConfigurer();
-        configurer.setClientBuilderCustomizer(cosmosClientBuilderCustomizers.orderedStream().findFirst().get());
         configurer.setAzureKeyCredentialCustomizer(azureKeyCredentialCustomizers.orderedStream().findFirst().orElse(null));
-        configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().get());
+        configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().orElse(null));
         return configurer;
     }
 
@@ -133,15 +116,20 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CosmosClientBuilder cosmosClientBuilderCustomizer(CosmosClientBuilderConfigurer cosmosClientBuilderConfigurer) {
-        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder();
-        return cosmosClientBuilderConfigurer.configure(cosmosClientBuilder);
+        CosmosClientBuilder builder = new CosmosClientBuilder();
+        builder.consistencyLevel(properties.getConsistencyLevel())
+               .endpoint(properties.getUri());
+        if (ConnectionMode.GATEWAY == properties.getConnectionMode()) {
+            builder.gatewayMode();
+        }
+        return cosmosClientBuilderConfigurer.configure(builder);
     }
 
     @Override
     public CosmosConfig cosmosConfig() {
         return CosmosConfig.builder()
-                           .enableQueryMetrics(cosmosProperties.isPopulateQueryMetrics())
-                           .responseDiagnosticsProcessor(cosmosProperties.getResponseDiagnosticsProcessor())
+                           .enableQueryMetrics(properties.isPopulateQueryMetrics())
+                           .responseDiagnosticsProcessor(properties.getResponseDiagnosticsProcessor())
                            .build();
     }
 }

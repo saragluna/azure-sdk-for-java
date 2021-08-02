@@ -12,7 +12,6 @@ import com.azure.spring.SpringMappingCredentialPropertiesProvider;
 import com.azure.spring.cloud.autoconfigure.context.AzureResourceManagerAutoConfiguration;
 import com.azure.spring.cloud.context.core.impl.StorageAccountManager;
 import com.azure.spring.cloud.context.core.storage.StorageConnectionStringProvider;
-import com.azure.spring.identity.ClientBuilderCustomizer;
 import com.azure.spring.identity.ConnectionStringClientBuilderCustomizer;
 import com.azure.spring.identity.SharedKeyCredentialClientBuilderCustomizer;
 import com.azure.spring.identity.TokenCredentialClientBuilderCustomizer;
@@ -49,11 +48,11 @@ public class AzureStorageQueueAutoConfiguration {
 
     private static final String STORAGE_QUEUE_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "storageQueueChainedTokenCredential";
     private static final String STORAGE_QUEUE_SHARED_KEY_CREDENTIAL_BEAN_NAME = "storageQueueSharedKeyCredential";
+    private static final String STORAGE_QUEUE_ENDPOINT_PATTERN = "https://%s.queue.core.windows.net/";
+    private final AzureStorageProperties properties;
 
-    private final AzureStorageProperties azureStorageProperties;
-
-    public AzureStorageQueueAutoConfiguration(AzureStorageProperties azureStorageProperties) {
-        this.azureStorageProperties = azureStorageProperties;
+    public AzureStorageQueueAutoConfiguration(AzureStorageProperties properties) {
+        this.properties = properties;
     }
 
     @Bean
@@ -63,32 +62,25 @@ public class AzureStorageQueueAutoConfiguration {
         AzureStorageProperties storageProperties,
         ObjectProvider<AzureEnvironment> azureEnvironmentProvider,
         ObjectProvider<StorageAccountManager> storageAccountManagerProvider) {
-        ConnectionStringClientBuilderCustomizer<QueueClientBuilder> connectionStringCustomizer =
-            (builder, callback) -> {
-                StorageConnectionStringProvider provider = null;
-                final String account = storageProperties.getAccount();
-                StorageAccountManager storageAccountManager = storageAccountManagerProvider.getIfAvailable();
-                if (storageAccountManager != null) {
-                    provider = new StorageConnectionStringProvider(storageAccountManager.getOrCreate(account));
-                } else {
-                    final String accessKey = storageProperties.getAccessKey();
-                    AzureEnvironment azureEnvironment = azureEnvironmentProvider.getIfAvailable(()-> AzureEnvironment.AZURE);
-                    if (azureEnvironment != null) {
-                        provider = new StorageConnectionStringProvider(account, accessKey, azureEnvironment);
-                    }
-                }
-                if (provider != null) {
-                    builder.connectionString(provider.getConnectionString());
-                    callback.skipCredential();
-                }
-            };
-        return connectionStringCustomizer;
+        return builder -> {
+            StorageConnectionStringProvider provider;
+            String account = storageProperties.getAccount();
+            StorageAccountManager storageAccountManager = storageAccountManagerProvider.getIfAvailable();
+            if (storageAccountManager != null) {
+                provider = new StorageConnectionStringProvider(storageAccountManager.getOrCreate(account));
+            } else {
+                final String accessKey = storageProperties.getAccessKey();
+                AzureEnvironment azureEnvironment = azureEnvironmentProvider.getIfAvailable(()-> AzureEnvironment.AZURE);
+                provider = new StorageConnectionStringProvider(account, accessKey, azureEnvironment);
+            }
+            builder.connectionString(provider.getConnectionString());
+        };
     }
 
     @Bean(STORAGE_QUEUE_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = STORAGE_QUEUE_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
     public ChainedTokenCredential storageQueueChainedTokenCredential(TokenCredential defaultTokenCredential) {
-        SpringMappingCredentialPropertiesProvider propertiesProvider = new SpringMappingCredentialPropertiesProvider(azureStorageProperties);
+        SpringMappingCredentialPropertiesProvider propertiesProvider = new SpringMappingCredentialPropertiesProvider(properties);
         final ChainedTokenCredentialBuilder chainedTokenCredentialBuilder = new ChainedTokenCredentialBuilder();
         chainedTokenCredentialBuilder.addLast(propertiesProvider.mappingTokenCredential())
                                      .addLast(defaultTokenCredential);
@@ -100,10 +92,7 @@ public class AzureStorageQueueAutoConfiguration {
     public SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> queueSharedKeyCredentialCustomizer(
         @Autowired(required = false) @Qualifier(STORAGE_QUEUE_SHARED_KEY_CREDENTIAL_BEAN_NAME) StorageSharedKeyCredential sharedKeyCredential) {
         if (sharedKeyCredential != null) {
-            return (builder, callback) -> {
-                builder.credential(sharedKeyCredential);
-                callback.skipCredential();
-            };
+            return builder -> builder.credential(sharedKeyCredential);
         }
         return null;
     }
@@ -115,16 +104,9 @@ public class AzureStorageQueueAutoConfiguration {
         return builder -> builder.credential(storageQueueChainedTokenCredential);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ClientBuilderCustomizer<QueueClientBuilder> storageQueueClientBuilderCustomizers() {
-        return builder -> builder.clientOptions(new ClientOptions().setApplicationId(AZURE_SPRING_STORAGE_QUEUE + VERSION));
-    }
-
     /**
      * Storage Queue client builder configurer
      * @param connectionStringClientBuilderCustomizers Customize the connection string client builder
-     * @param clientBuilderCustomizers Customize queue client builder
      * @param sharedKeyCredentialCustomizers Customize shared key credential
      * @param tokenCredentialCustomizers Customize token credential.
      * @return Cosmos client builder configurer
@@ -132,14 +114,12 @@ public class AzureStorageQueueAutoConfiguration {
     @Bean
     public StorageQueueClientBuilderConfigurer storageQueueClientBuilderConfigurer(
         ObjectProvider<ConnectionStringClientBuilderCustomizer<QueueClientBuilder>> connectionStringClientBuilderCustomizers,
-        ObjectProvider<ClientBuilderCustomizer<QueueClientBuilder>> clientBuilderCustomizers,
         ObjectProvider<SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder>> sharedKeyCredentialCustomizers,
         ObjectProvider<TokenCredentialClientBuilderCustomizer<QueueClientBuilder>> tokenCredentialCustomizers) {
         StorageQueueClientBuilderConfigurer configurer = new StorageQueueClientBuilderConfigurer();
         configurer.setConnectionStringClientBuilderCustomizer(connectionStringClientBuilderCustomizers.orderedStream().findFirst().orElse(null));
-        configurer.setClientBuilderCustomizer(clientBuilderCustomizers.orderedStream().findFirst().get());
         configurer.setShareKeyCredentialCustomizer(sharedKeyCredentialCustomizers.orderedStream().findFirst().orElse(null));
-        configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().get());
+        configurer.setTokenCredentialCustomizer(tokenCredentialCustomizers.orderedStream().findFirst().orElse(null));
         return configurer;
     }
 
@@ -151,8 +131,10 @@ public class AzureStorageQueueAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public QueueClientBuilder queueServiceClientBuilder(StorageQueueClientBuilderConfigurer storageQueueClientBuilderConfigurer) {
-        QueueClientBuilder serviceClientBuilder = new QueueClientBuilder();
-        return storageQueueClientBuilderConfigurer.configure(serviceClientBuilder);
+        QueueClientBuilder builder = new QueueClientBuilder();
+        builder.endpoint(String.format(STORAGE_QUEUE_ENDPOINT_PATTERN, properties.getAccount()))
+               .clientOptions(new ClientOptions().setApplicationId(AZURE_SPRING_STORAGE_QUEUE + VERSION));
+        return storageQueueClientBuilderConfigurer.configure(builder);
     }
 
     @Bean

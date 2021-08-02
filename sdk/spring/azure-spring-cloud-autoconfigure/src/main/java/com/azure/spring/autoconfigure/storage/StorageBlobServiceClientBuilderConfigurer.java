@@ -4,16 +4,13 @@
 package com.azure.spring.autoconfigure.storage;
 
 import com.azure.spring.identity.AbstractClientBuilderConfigurer;
-import com.azure.spring.identity.ClientBuilderCustomizer;
 import com.azure.spring.identity.SharedKeyCredentialClientBuilderCustomizer;
-import com.azure.spring.identity.DefaultSkipCredentialCallback;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 
 /**
  * Configurer for extending Azure Storage Blob service client builder configuration.
  */
-public class StorageBlobServiceClientBuilderConfigurer
-    extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer<BlobServiceClientBuilder>, BlobServiceClientBuilder> {
+public class StorageBlobServiceClientBuilderConfigurer extends AbstractClientBuilderConfigurer<BlobServiceClientBuilder> {
 
     private SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> shareKeyCredentialCustomizer;
 
@@ -28,12 +25,10 @@ public class StorageBlobServiceClientBuilderConfigurer
 
     @Override
     public BlobServiceClientBuilder configure(BlobServiceClientBuilder builder) {
-        configureClientBuilder(builder);
+        super.configure(builder);
         if (shareKeyCredentialCustomizer != null) {
-            shareKeyCredentialCustomizer.sharedKeyCredential(builder,
-                new DefaultSkipCredentialCallback<>(this));
+            shareKeyCredentialCustomizer.sharedKeyCredential(builder);
         }
-        configureTokenCredential(builder);
         return builder;
     }
 }

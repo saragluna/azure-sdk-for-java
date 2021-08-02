@@ -6,7 +6,7 @@ package com.azure.spring.identity;
 /**
  * Customize AzureKeyCredential for Azure SDK service client builder.
  */
-public interface AzureKeyCredentialClientBuilderCustomizer<ClientBuilderType> {
+public interface AzureKeyCredentialClientBuilderCustomizer<T> {
 
-    void keyCredential(ClientBuilderType builder, TokenCredentialCallback callback);
+    void keyCredential(T clientBuilder);
 }

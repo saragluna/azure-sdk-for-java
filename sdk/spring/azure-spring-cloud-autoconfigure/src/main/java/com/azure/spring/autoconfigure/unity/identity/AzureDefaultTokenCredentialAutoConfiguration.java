@@ -27,6 +27,7 @@ import java.util.List;
 public class AzureDefaultTokenCredentialAutoConfiguration {
 
     public static final int SPRING_ENV_CREDENTIAL_ORDER = 0;
+    public static final String DEFAULT_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME = "defaultChainedTokenCredential";
 
     @Bean
     public AzureSpringConfiguration azureSpringConfiguration(AzureProperties azureProperties) {
@@ -76,8 +77,8 @@ public class AzureDefaultTokenCredentialAutoConfiguration {
     }
 
     @SuppressWarnings("rawtypes")
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean(DEFAULT_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
+    @ConditionalOnMissingBean(name = DEFAULT_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
     // TODO (xiada) dedicated names for the azureTokenCredential
     public TokenCredential azureTokenCredential(List<SpringCredentialBuilderBase> credentialBuilders) {
         final ChainedTokenCredentialBuilder chainedTokenCredentialBuilder = new ChainedTokenCredentialBuilder();

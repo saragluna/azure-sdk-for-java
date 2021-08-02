@@ -6,7 +6,7 @@ package com.azure.spring.identity;
 /**
  * Customize TokenCredential for Azure SDK service client builder.
  */
-public interface TokenCredentialClientBuilderCustomizer<ClientBuilderType> {
+public interface TokenCredentialClientBuilderCustomizer<T> {
 
-    void tokenCredential(ClientBuilderType clientBuilder);
+    void tokenCredential(T clientBuilder);
 }

@@ -6,7 +6,7 @@ package com.azure.spring.identity;
 /**
  * Customize connectionString for Azure SDK service client builder.
  */
-public interface ConnectionStringClientBuilderCustomizer<ClientBuilderType> {
+public interface ConnectionStringClientBuilderCustomizer<T> {
 
-    void connectionString(ClientBuilderType clientBuilder, TokenCredentialCallback callback);
+    void connectionString(T clientBuilder);
 }

@@ -4,17 +4,14 @@
 package com.azure.spring.cloud.autoconfigure.storage;
 
 import com.azure.spring.identity.AbstractClientBuilderConfigurer;
-import com.azure.spring.identity.ClientBuilderCustomizer;
 import com.azure.spring.identity.ConnectionStringClientBuilderCustomizer;
 import com.azure.spring.identity.SharedKeyCredentialClientBuilderCustomizer;
-import com.azure.spring.identity.DefaultSkipCredentialCallback;
 import com.azure.storage.queue.QueueClientBuilder;
 
 /**
  * Configurer for extending Azure Storage Queue service client builder configuration.
  */
-public class StorageQueueClientBuilderConfigurer
-    extends AbstractClientBuilderConfigurer<ClientBuilderCustomizer<QueueClientBuilder>, QueueClientBuilder> {
+public class StorageQueueClientBuilderConfigurer extends AbstractClientBuilderConfigurer<QueueClientBuilder> {
 
     private ConnectionStringClientBuilderCustomizer<QueueClientBuilder> connectionStringClientBuilderCustomizer;
     private SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> shareKeyCredentialCustomizer;
@@ -34,14 +31,13 @@ public class StorageQueueClientBuilderConfigurer
 
     @Override
     public QueueClientBuilder configure(QueueClientBuilder builder) {
-        DefaultSkipCredentialCallback<StorageQueueClientBuilderConfigurer> credentialCallback = new DefaultSkipCredentialCallback<>(this);
+        super.configure(builder);
+        if (shareKeyCredentialCustomizer != null) {
+            shareKeyCredentialCustomizer.sharedKeyCredential(builder);
+        }
         if (connectionStringClientBuilderCustomizer != null) {
-            connectionStringClientBuilderCustomizer.connectionString(builder, credentialCallback);
+            connectionStringClientBuilderCustomizer.connectionString(builder);
         }
-        if (!credentialCallback.isSkipCredential() && shareKeyCredentialCustomizer != null) {
-            shareKeyCredentialCustomizer.sharedKeyCredential(builder, credentialCallback);
-        }
-        configureTokenCredential(builder);
         return builder;
     }
 }
