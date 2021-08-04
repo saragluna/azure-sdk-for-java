@@ -4,7 +4,7 @@
 package com.azure.spring.identity;
 
 /**
- * Configurer for extending Azure service client builder configuration.
+ * Abstract configurer for extending Azure service client builder configuration.
  */
 public abstract class AbstractClientBuilderConfigurer<T> {
 

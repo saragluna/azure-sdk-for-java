@@ -18,18 +18,16 @@ import com.azure.spring.data.cosmos.core.CosmosTemplate;
 import com.azure.spring.identity.AzureKeyCredentialClientBuilderCustomizer;
 import com.azure.spring.identity.TokenCredentialClientBuilderCustomizer;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
-
-import java.util.Optional;
 
 import static com.azure.spring.autoconfigure.unity.identity.AzureDefaultTokenCredentialAutoConfiguration.DEFAULT_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME;
 
@@ -57,11 +55,9 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
 
     @Bean(COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME)
     @ConditionalOnMissingBean(name = COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME)
+    @ConditionalOnProperty("spring.cloud.azure.cosmos.key")
     public AzureKeyCredential cosmosAzureKeyCredential() {
-        return Optional.ofNullable(properties.getKey())
-                       .filter(StringUtils::hasText)
-                       .map(AzureKeyCredential::new)
-                       .orElse(null);
+        return new AzureKeyCredential(properties.getKey());
     }
 
     @Bean(COSMOS_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
@@ -77,12 +73,10 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(name = COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME)
     public AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder> azureKeyCredentialCustomizer(
-        @Autowired(required = false) @Qualifier(COSMOS_AZURE_KEY_CREDENTIAL_BEAN_NAME) AzureKeyCredential cosmosAzureKeyCredential) {
-        if (cosmosAzureKeyCredential != null) {
-            return builder -> builder.credential(cosmosAzureKeyCredential);
-        }
-        return null;
+        AzureKeyCredential cosmosAzureKeyCredential) {
+        return builder -> builder.credential(cosmosAzureKeyCredential);
     }
 
     @Bean
@@ -99,6 +93,7 @@ public class CosmosAutoConfiguration extends AbstractCosmosConfiguration {
      * @return Cosmos client builder configurer
      */
     @Bean
+    @ConditionalOnMissingBean
     public CosmosClientBuilderConfigurer cosmosClientBuilderConfigurer(
         ObjectProvider<AzureKeyCredentialClientBuilderCustomizer<CosmosClientBuilder>> azureKeyCredentialCustomizers,
         ObjectProvider<TokenCredentialClientBuilderCustomizer<CosmosClientBuilder>> tokenCredentialCustomizers) {

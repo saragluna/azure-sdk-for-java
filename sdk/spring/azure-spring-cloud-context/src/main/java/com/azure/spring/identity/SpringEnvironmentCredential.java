@@ -51,7 +51,6 @@ public class SpringEnvironmentCredential implements TokenCredential {
         final String tenantId = credentialPropertiesProvider.getTenantId();
         final String clientId = credentialPropertiesProvider.getClientId();
         final String clientSecret = credentialPropertiesProvider.getClientSecret();
-        final String authorityHost = credentialPropertiesProvider.getAuthorityHost();
 
         if (tenantId != null && clientId != null && clientSecret != null) {
             final ClientSecretCredentialBuilder builder = new ClientSecretCredentialBuilder()

@@ -16,9 +16,9 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.common.StorageSharedKeyCredential;
 import com.azure.storage.file.share.ShareServiceClientBuilder;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -62,12 +62,10 @@ public class StorageAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(name = STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME)
     public SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder> blobShareKeyCredentialCustomizer(
-        @Autowired(required = false) @Qualifier(STORAGE_BLOB_SHARED_KEY_CREDENTIAL_BEAN_NAME) StorageSharedKeyCredential sharedKeyCredential) {
-        if (sharedKeyCredential != null) {
-            return builder -> builder.credential(sharedKeyCredential);
-        }
-        return null;
+        StorageSharedKeyCredential sharedKeyCredential) {
+        return builder -> builder.credential(sharedKeyCredential);
     }
 
     @Bean(STORAGE_BLOB_CHAINED_TOKEN_CREDENTIAL_BEAN_NAME)
@@ -96,6 +94,7 @@ public class StorageAutoConfiguration {
      * @return Cosmos client builder configurer
      */
     @Bean
+    @ConditionalOnMissingBean
     public StorageBlobServiceClientBuilderConfigurer storageBlobClientBuilderConfigurer(
         ObjectProvider<SharedKeyCredentialClientBuilderCustomizer<BlobServiceClientBuilder>> sharedKeyCredentialCustomizers,
         ObjectProvider<TokenCredentialClientBuilderCustomizer<BlobServiceClientBuilder>> tokenCredentialCustomizers) {

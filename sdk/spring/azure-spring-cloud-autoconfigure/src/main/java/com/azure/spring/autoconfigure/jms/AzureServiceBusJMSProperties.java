@@ -3,7 +3,6 @@
 
 package com.azure.spring.autoconfigure.jms;
 
-import com.azure.spring.autoconfigure.unity.AzureProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +14,7 @@ import javax.annotation.PostConstruct;
  */
 @Validated
 @ConfigurationProperties(AzureServiceBusJMSProperties.PREFIX)
-public class AzureServiceBusJMSProperties extends AzureProperties {
+public class AzureServiceBusJMSProperties {
 
     public static final String PREFIX = "spring.jms.servicebus";
 

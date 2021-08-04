@@ -23,7 +23,6 @@ import com.azure.storage.common.StorageSharedKeyCredential;
 import com.azure.storage.queue.QueueClientBuilder;
 import com.azure.storage.queue.QueueServiceClient;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -89,12 +88,10 @@ public class AzureStorageQueueAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(name = STORAGE_QUEUE_SHARED_KEY_CREDENTIAL_BEAN_NAME)
     public SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder> queueSharedKeyCredentialCustomizer(
-        @Autowired(required = false) @Qualifier(STORAGE_QUEUE_SHARED_KEY_CREDENTIAL_BEAN_NAME) StorageSharedKeyCredential sharedKeyCredential) {
-        if (sharedKeyCredential != null) {
-            return builder -> builder.credential(sharedKeyCredential);
-        }
-        return null;
+        StorageSharedKeyCredential sharedKeyCredential) {
+        return builder -> builder.credential(sharedKeyCredential);
     }
 
     @Bean
@@ -112,6 +109,7 @@ public class AzureStorageQueueAutoConfiguration {
      * @return Cosmos client builder configurer
      */
     @Bean
+    @ConditionalOnMissingBean
     public StorageQueueClientBuilderConfigurer storageQueueClientBuilderConfigurer(
         ObjectProvider<ConnectionStringClientBuilderCustomizer<QueueClientBuilder>> connectionStringClientBuilderCustomizers,
         ObjectProvider<SharedKeyCredentialClientBuilderCustomizer<QueueClientBuilder>> sharedKeyCredentialCustomizers,

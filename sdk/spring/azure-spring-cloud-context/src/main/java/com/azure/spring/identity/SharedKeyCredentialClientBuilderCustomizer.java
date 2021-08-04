@@ -4,7 +4,7 @@
 package com.azure.spring.identity;
 
 /**
- * Customize AzureKeyCredential for Azure SDK service client builder.
+ * Customize SharedAzureKeyCredential for Azure SDK service client builder.
  */
 public interface SharedKeyCredentialClientBuilderCustomizer<T> {
 

@@ -4,7 +4,7 @@
 package com.azure.spring.identity;
 
 /**
- * Customize connectionString for Azure SDK service client builder.
+ * Customize connection string for Azure SDK service client builder.
  */
 public interface ConnectionStringClientBuilderCustomizer<T> {
 
