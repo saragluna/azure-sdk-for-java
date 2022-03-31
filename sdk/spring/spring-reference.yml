@@ -1,3 +1,6 @@
+# Please refer to this link to see design details and how to change:
+# https://dev.azure.com/azure-spring-integration/spring-integration-private/_wiki/wikis/spring-integration-private.wiki/280/Spring-Reference-for-Intellij-Plugin.
+
 ---
 - name: Spring Cloud Azure Bom
   content:
@@ -18,7 +21,7 @@
             gradle: |
               dependencyManagement {
                 imports {
-                  mavenBom "com.azure.spring:azure-spring-boot-bom:${azure.version}"
+                  mavenBom "com.azure.spring:spring-cloud-azure-dependencies:${azure.version}"
                 }
               }
             maven: |
@@ -26,7 +29,7 @@
                   <dependencies>
                     <dependency>
                       <groupId>com.azure.spring</groupId>
-                      <artifactId>azure-spring-boot-bom</artifactId>
+                      <artifactId>spring-cloud-azure-dependencies</artifactId>
                       <version>${azure.version}</version>
                       <type>pom</type>
                       <scope>import</scope>
@@ -353,8 +356,13 @@
                 groupId: com.azure.spring
                 artifactId: spring-cloud-azure-starter-storage-blob
                 version: 4.0.0
-    - name: Storage - File Shares
-      description: todo
+    - name: Storage - Files Shares
+      description: |-
+        Azure File Share storage offers fully managed file shares in the cloud that are
+        accessible via the industry standard Server Message Block (SMB) protocol. Azure file
+        shares can be mounted concurrently by cloud or on-premises deployments of Windows,
+        Linux, and macOS. Additionally, Azure file shares can be cached on Windows Servers
+        with Azure File Sync for fast access near where the data is being used.
       msDocs: https://docs.microsoft.com/azure/storage/files/
       clientSource:
         groupId: com.azure
