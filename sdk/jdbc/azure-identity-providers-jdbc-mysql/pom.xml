@@ -169,6 +169,98 @@
         </executions>
       </plugin>
       <!-- END: Empty Java Doc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <shadedArtifactAttached>true</shadedArtifactAttached>
+          <shadedClassifierName>shaded</shadedClassifierName>
+          <minimizeJar>true</minimizeJar>
+          <artifactSet>
+            <excludes>
+              <exclude>org.junit.jupiter:jupiter</exclude>
+              <exclude>org.codehaus.woodstox:stax2-api</exclude>
+              <exclude>com.fasterxml.woodstox:woodstox-core</exclude>
+            </excludes>
+          </artifactSet>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>
+          <relocations>
+            <relocation>
+              <pattern>com.azure.core</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.com.azure.core</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.microsoft.aad</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.com.microsoft.aad</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.nimbusds</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.com.nimbusds</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.fasterxml.jackson</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.com.fasterxml.jackson</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>com.sun.jna</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.com.sun.jna</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>io.netty</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.io.netty</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>net.jcip</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.net.jcip</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>net.minidev</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.net.minidev</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.reactivestreams</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.org.reactivestreams</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>reactor</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.reactor</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.objectweb.asm</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.org.objectweb.asm</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.slf4j</pattern>
+              <shadedPattern>com.azure.identity.providers.mysql.implementation.shaded.org.slf4j</shadedPattern>
+            </relocation>
+          </relocations>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+              <addHeader>false</addHeader>
+            </transformer>
+          </transformers>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
