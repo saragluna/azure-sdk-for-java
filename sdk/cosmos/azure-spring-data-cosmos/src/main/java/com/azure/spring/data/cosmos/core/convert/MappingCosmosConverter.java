@@ -11,11 +11,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.data.convert.CustomConversions;
 import org.springframework.data.convert.EntityConverter;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
@@ -35,7 +37,7 @@ import static com.azure.spring.data.cosmos.Constants.ISO_8601_COMPATIBLE_DATE_PA
 public class MappingCosmosConverter
     implements EntityConverter<CosmosPersistentEntity<?>, CosmosPersistentProperty, Object,
     JsonNode>,
-    ApplicationContextAware {
+    ApplicationContextAware, InitializingBean {
 
     /**
      * Mapping context
@@ -46,6 +48,7 @@ public class MappingCosmosConverter
      * Generic conversion service
      */
     protected GenericConversionService conversionService;
+    protected CustomConversions customConversions = new CosmosCustomConventions();
     private ApplicationContext applicationContext;
     private final ObjectMapper objectMapper;
 
@@ -62,6 +65,11 @@ public class MappingCosmosConverter
         this.conversionService = new GenericConversionService();
         this.objectMapper = objectMapper == null ? ObjectMapperFactory.getObjectMapper()
             : objectMapper;
+    }
+
+    public void setCustomConversions(CustomConversions customConversions) {
+        Assert.notNull(customConversions, "Conversions must not be null");
+        this.customConversions = customConversions;
     }
 
     @Override
@@ -236,4 +244,12 @@ public class MappingCosmosConverter
         return fromPropertyValue;
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initializeConverters();
+    }
+
+    private void initializeConverters() {
+        customConversions.registerConvertersIn(conversionService);
+    }
 }
