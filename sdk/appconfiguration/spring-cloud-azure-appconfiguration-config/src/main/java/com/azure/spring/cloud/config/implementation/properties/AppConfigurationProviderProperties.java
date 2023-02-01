@@ -4,14 +4,13 @@ package com.azure.spring.cloud.config.implementation.properties;
 
 import java.time.Instant;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * Properties defining connection to Azure App Configuration.
@@ -33,23 +32,18 @@ public class AppConfigurationProviderProperties {
     @Value("${version:1.0}")
     private String version;
 
-    @NotNull
     @Value("${maxRetries:2}")
     private int maxRetries;
 
-    @NotNull
     @Value("${maxRetryTime:60}")
     private int maxRetryTime;
 
-    @NotNull
     @Value("${prekillTime:5}")
     private int prekillTime;
 
-    @NotNull
     @Value("${defaultMinBackoff:30}")
     private Long defaultMinBackoff;
 
-    @NotNull
     @Value("${defaultMaxBackoff:600}")
     private Long defaultMaxBackoff;
 

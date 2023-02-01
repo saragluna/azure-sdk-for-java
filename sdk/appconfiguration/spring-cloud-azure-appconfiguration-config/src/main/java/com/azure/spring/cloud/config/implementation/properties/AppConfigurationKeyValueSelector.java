@@ -9,11 +9,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Properties on what Selects are checked before loading configurations.
@@ -32,7 +31,6 @@ public final class AppConfigurationKeyValueSelector {
      */
     public static final String LABEL_SEPARATOR = ",";
 
-    @NotNull
     private String keyFilter = "";
 
     private String labelFilter;

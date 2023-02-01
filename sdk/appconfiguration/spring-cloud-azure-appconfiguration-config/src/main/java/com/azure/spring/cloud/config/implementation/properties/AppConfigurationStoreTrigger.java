@@ -4,17 +4,15 @@ package com.azure.spring.cloud.config.implementation.properties;
 
 import static com.azure.spring.cloud.config.implementation.AppConfigurationConstants.EMPTY_LABEL;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.util.Assert;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Properties on what Triggers are checked before a refresh is triggered.
  */
 public final class AppConfigurationStoreTrigger {
 
-    @NotNull
     private String key;
 
     private String label;

@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,7 +17,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import com.azure.spring.cloud.config.AppConfigurationRefresh;
@@ -73,7 +73,7 @@ public class AppConfigurationPullRefresh implements AppConfigurationRefresh, Env
      */
     @Async
     public Future<Boolean> refreshConfigurations() {
-        return new AsyncResult<>(refreshStores());
+        return CompletableFuture.supplyAsync(() -> refreshStores());
     }
 
     /**
