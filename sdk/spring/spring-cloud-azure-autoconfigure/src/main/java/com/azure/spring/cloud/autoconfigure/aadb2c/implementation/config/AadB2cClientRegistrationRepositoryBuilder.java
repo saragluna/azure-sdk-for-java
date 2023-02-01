@@ -24,8 +24,19 @@ public class AadB2cClientRegistrationRepositoryBuilder {
 
     private final Set<String> nonSignInClientRegistrationIds = new HashSet<>();
 
-    public AadB2cClientRegistrationsBuilder b2cClientRegistration() {
-        return new AadB2cClientRegistrationsBuilder(this);
+    public AadB2cClientRegistrationRepositoryBuilder b2cClientRegistrations(AadB2cClientRegistrationsBuilder builder) {
+        final AadB2cClientRegistrations aadB2cClientRegistrations = builder.build();
+        this.clientRegistrations(aadB2cClientRegistrations.getClientRegistrations().toArray(new ClientRegistration[0]));
+        this.nonSignInClientRegistrationIds(aadB2cClientRegistrations.getNonSignInClientRegistrationIds().toArray(String[]::new));
+        return this;
+    }
+
+    // configure  --> call method a -> return this
+    // method a --> return wrap(this)  --> need to call configure
+
+    public AadB2cClientRegistrationRepositoryBuilder configure(AadB2cClientRegistrationRepositoryBuilderConfigurer configurer) {
+        this.configurers.add(configurer);
+        return this;
     }
 
     public AadB2cClientRegistrationRepositoryBuilder clientRegistrations(ClientRegistration... clientRegistrations) {
@@ -35,11 +46,6 @@ public class AadB2cClientRegistrationRepositoryBuilder {
 
     public AadB2cClientRegistrationRepositoryBuilder nonSignInClientRegistrationIds(String... clientRegistrationIds) {
         Arrays.stream(clientRegistrationIds).forEach(this.nonSignInClientRegistrationIds::add);
-        return this;
-    }
-
-    public AadB2cClientRegistrationRepositoryBuilder configure(AadB2cClientRegistrationRepositoryBuilderConfigurer configurer) {
-        this.configurers.add(configurer);
         return this;
     }
 

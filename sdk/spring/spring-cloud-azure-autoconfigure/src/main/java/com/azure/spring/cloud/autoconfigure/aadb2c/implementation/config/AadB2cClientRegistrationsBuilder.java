@@ -44,19 +44,8 @@ public final class AadB2cClientRegistrationsBuilder {
 
     private Set<String> userFlows = Collections.emptySet();
 
-    private final AadB2cClientRegistrationRepositoryBuilder repositoryBuilder;
-    private final AadB2cClientRegistrationRepositoryBuilderConfigurer configurer;
-
-    public AadB2cClientRegistrationsBuilder(AadB2cClientRegistrationRepositoryBuilder repositoryBuilder) {
-        this.repositoryBuilder = repositoryBuilder;
-        this.configurer = new AadB2cClientRegistrationConfigurer();
-        this.repositoryBuilder.configure(this.configurer);
+    public AadB2cClientRegistrationsBuilder() {
     }
-
-    public AadB2cClientRegistrationRepositoryBuilder and() {
-        return repositoryBuilder;
-    }
-
 
     /**
      * Sets the client identifier.
@@ -156,82 +145,77 @@ public final class AadB2cClientRegistrationsBuilder {
         return this;
     }
 
-    private class AadB2cClientRegistrationConfigurer implements AadB2cClientRegistrationRepositoryBuilderConfigurer {
-        @Override
-        public void configure(AadB2cClientRegistrationRepositoryBuilder builder) {
-            // TODO validate properties
-
-            List<ClientRegistration> registrations = new ArrayList<>();
-
-            final List<ClientRegistration> userFlowRegistrations = userFlows
-                .stream()
-                .map(flow -> buildClientRegistration(flow))
-                .collect(Collectors.toList());
-
-            final List<ClientRegistration> authorizationClientRegistrations = authorizationClients
-                .entrySet()
-                .stream()
-                .map(entry -> buildClientRegistration(entry.getKey(), entry.getValue().getT1(), entry.getValue().getT2()))
-                .collect(Collectors.toList());
-
-            registrations.addAll(userFlowRegistrations);
-            registrations.addAll(authorizationClientRegistrations);
-
-            builder.clientRegistrations(registrations.toArray(new ClientRegistration[0]));
-
-            builder.nonSignInClientRegistrationIds(userFlows.stream().filter(f -> !f.equals(signInUserFlow)).toArray(String[]::new));
+    /**
+     * Build xxx
+     * @param userFlow
+     * @return
+     */
+    private ClientRegistration buildClientRegistration(String userFlow) {
+        Map<String, Object> providerConfigurationMetadata = null;
+        if (userFlow.equals(signInUserFlow)) {
+            providerConfigurationMetadata = new HashMap<>();
+            providerConfigurationMetadata.put("end_session_endpoint", AadB2cUrl.getEndSessionUrl(baseUri, userFlow));
         }
+        return ClientRegistration.withRegistrationId(userFlow)
+            .clientName(userFlow)
+            .clientId(clientId)
+            .clientSecret(clientSecret)
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .redirectUri(replyUrl)
+            .scope(clientId, "openid", "offline_access")
+            .authorizationUri(AadB2cUrl.getAuthorizationUrl(baseUri))
+            .tokenUri(AadB2cUrl.getTokenUrl(baseUri, userFlow))
+            .jwkSetUri(AadB2cUrl.getJwkSetUrl(baseUri, userFlow))
+            .userNameAttributeName(userNameAttributeName)
+            .providerConfigurationMetadata(providerConfigurationMetadata)
+            .build();
+    }
 
-        /**
-         * Build xxx
-         * @param userFlow
-         * @return
-         */
-        private ClientRegistration buildClientRegistration(String userFlow) {
-            Map<String, Object> providerConfigurationMetadata = null;
-            if (userFlow.equals(signInUserFlow)) {
-                providerConfigurationMetadata = new HashMap<>();
-                providerConfigurationMetadata.put("end_session_endpoint", AadB2cUrl.getEndSessionUrl(baseUri, userFlow));
-            }
-            return ClientRegistration.withRegistrationId(userFlow)
-                .clientName(userFlow)
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri(replyUrl)
-                .scope(clientId, "openid", "offline_access")
-                .authorizationUri(AadB2cUrl.getAuthorizationUrl(baseUri))
-                .tokenUri(AadB2cUrl.getTokenUrl(baseUri, userFlow))
-                .jwkSetUri(AadB2cUrl.getJwkSetUrl(baseUri, userFlow))
-                .userNameAttributeName(userNameAttributeName)
-                .providerConfigurationMetadata(providerConfigurationMetadata)
-                .build();
-        }
+    /**
+     *
+     * @param clientRegistrationId
+     * @param authorizationGrantType
+     * @param scopes
+     * @return
+     */
+    private ClientRegistration buildClientRegistration(String clientRegistrationId,
+                                                       AuthorizationGrantType authorizationGrantType,
+                                                       Set<String> scopes) {
+        Assert.isTrue(CLIENT_CREDENTIALS.equals(authorizationGrantType),
+            "The authorization type of the " + clientRegistrationId + " client registration is not supported.");
+        return ClientRegistration.withRegistrationId(clientRegistrationId)
+            .clientName(clientRegistrationId)
+            .clientId(clientId)
+            .clientSecret(clientSecret)
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+            .authorizationGrantType(authorizationGrantType)
+            .scope(scopes)
+            .tokenUri(AadB2cUrl.getAADTokenUrl(tenantId))
+            .jwkSetUri(AadB2cUrl.getAADJwkSetUrl(tenantId))
+            .build();
+    }
 
-        /**
-         *
-         * @param clientRegistrationId
-         * @param authorizationGrantType
-         * @param scopes
-         * @return
-         */
-        private ClientRegistration buildClientRegistration(String clientRegistrationId,
-                                                           AuthorizationGrantType authorizationGrantType,
-                                                           Set<String> scopes) {
-            Assert.isTrue(CLIENT_CREDENTIALS.equals(authorizationGrantType),
-                "The authorization type of the " + clientRegistrationId + " client registration is not supported.");
-            return ClientRegistration.withRegistrationId(clientRegistrationId)
-                .clientName(clientRegistrationId)
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                .authorizationGrantType(authorizationGrantType)
-                .scope(scopes)
-                .tokenUri(AadB2cUrl.getAADTokenUrl(tenantId))
-                .jwkSetUri(AadB2cUrl.getAADJwkSetUrl(tenantId))
-                .build();
-        }
+    public AadB2cClientRegistrations build() {
+        // TODO validate properties
 
+        List<ClientRegistration> registrations = new ArrayList<>();
+
+        final List<ClientRegistration> userFlowRegistrations = userFlows
+            .stream()
+            .map(flow -> buildClientRegistration(flow))
+            .collect(Collectors.toList());
+
+        final List<ClientRegistration> authorizationClientRegistrations = authorizationClients
+            .entrySet()
+            .stream()
+            .map(entry -> buildClientRegistration(entry.getKey(), entry.getValue().getT1(), entry.getValue().getT2()))
+            .collect(Collectors.toList());
+
+        registrations.addAll(userFlowRegistrations);
+        registrations.addAll(authorizationClientRegistrations);
+
+
+        return new AadB2cClientRegistrations(registrations, userFlows.stream().filter(f -> !f.equals(signInUserFlow)).collect(Collectors.toSet()));
     }
 }

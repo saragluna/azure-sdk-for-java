@@ -74,8 +74,7 @@ public class AadB2cOAuth2ClientConfiguration {
         ObjectProvider<AadB2cClientRegistrationRepositoryBuilderConfigurer> configurersProvider) {
         final AadB2cClientRegistrationRepositoryBuilder repositoryBuilder = new AadB2cClientRegistrationRepositoryBuilder();
 
-        final AadB2cClientRegistrationsBuilder clientRegistrationsBuilder = repositoryBuilder
-            .b2cClientRegistration()
+        final AadB2cClientRegistrationsBuilder clientRegistrationsBuilder = new AadB2cClientRegistrationsBuilder()
             .clientId(properties.getCredential().getClientId())
             .clientSecret(properties.getCredential().getClientSecret())
             .tenantId(properties.getProfile().getTenantId())
@@ -94,6 +93,7 @@ public class AadB2cOAuth2ClientConfiguration {
                     entry.getValue().getScopes().toArray(new String[0])
                 )
             );
+        repositoryBuilder.b2cClientRegistrations(clientRegistrationsBuilder);
 
         oAuth2ClientPropertiesProvider.ifAvailable(properties -> repositoryBuilder.clientRegistrations(
             getClientRegistrations(properties).values().toArray(new ClientRegistration[0]))
