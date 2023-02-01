@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.PostConstruct;
@@ -96,7 +95,9 @@ public final class FeatureFlagKeyValueSelector {
     @PostConstruct
     public void validateAndInit() {
         if (labelFilter != null) {
-            Assert.isTrue(!labelFilter.contains("*"), "LabelFilter must not contain asterisk(*)");
+            if (labelFilter.contains("*")) {
+                throw new IllegalArgumentException("LabelFilter must not contain asterisk(*)");
+            }
         }
     }
 

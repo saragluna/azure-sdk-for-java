@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.PostConstruct;
@@ -92,9 +91,13 @@ public final class AppConfigurationKeyValueSelector {
      */
     @PostConstruct
     public void validateAndInit() {
-        Assert.isTrue(!keyFilter.contains("*"), "KeyFilter must not contain asterisk(*)");
+        if (keyFilter.contains("*")) {
+            throw new IllegalArgumentException("KeyFilter must not contain asterisk(*)");
+        }
         if (labelFilter != null) {
-            Assert.isTrue(!labelFilter.contains("*"), "LabelFilter must not contain asterisk(*)");
+            if (labelFilter.contains("*")) {
+                throw new IllegalArgumentException("LabelFilter must not contain asterisk(*)");
+            }
         }
     }
 

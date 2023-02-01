@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import jakarta.annotation.PostConstruct;
 
@@ -104,13 +104,15 @@ public final class AppConfigurationStoreMonitoring {
     @PostConstruct
     public void validateAndInit() {
         if (enabled) {
-            Assert.notEmpty(triggers, "Triggers need to be set if refresh is enabled.");
+            if (CollectionUtils.isEmpty(triggers)) {
+                throw new IllegalArgumentException("Triggers need to be set if refresh is enabled.");
+            }
             for (AppConfigurationStoreTrigger trigger : triggers) {
                 trigger.validateAndInit();
             }
         }
-        Assert.isTrue(refreshInterval.getSeconds() >= 1, "Minimum refresh interval time is 1 Second.");
-        Assert.isTrue(featureFlagRefreshInterval.getSeconds() >= 1, "Minimum Feature Flag refresh interval time is 1 Second.");
+        isTrue(refreshInterval.getSeconds() >= 1, "Minimum refresh interval time is 1 Second.");
+        isTrue(featureFlagRefreshInterval.getSeconds() >= 1, "Minimum Feature Flag refresh interval time is 1 Second.");
     }
 
     /**
@@ -196,6 +198,12 @@ public final class AppConfigurationStoreMonitoring {
             return this.name != null && this.secret != null;
         }
 
+    }
+    
+    private static void isTrue(boolean expression, String message) {
+        if (!expression) {
+            throw new IllegalArgumentException(message);
+        }
     }
 
 }

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.azure.core.credential.TokenCredential;
@@ -93,7 +92,9 @@ public class AppConfigurationReplicaClientsBuilder implements EnvironmentAware {
      * @throws IllegalStateException when connection string isn't valid.
      */
     public static String getEndpointFromConnectionString(String connectionString) {
-        Assert.hasText(connectionString, "Connection string cannot be empty.");
+        if (!StringUtils.hasText(connectionString)) {
+            throw new IllegalArgumentException("Connection string cannot be empty.");
+        }
 
         Matcher matcher = CONN_STRING_PATTERN.matcher(connectionString);
         if (!matcher.find()) {
@@ -101,8 +102,10 @@ public class AppConfigurationReplicaClientsBuilder implements EnvironmentAware {
         }
 
         String endpoint = matcher.group(1);
-
-        Assert.hasText(endpoint, String.format(NON_EMPTY_MSG, "Endpoint"));
+        
+        if (!StringUtils.hasText(endpoint)) {
+            throw new IllegalArgumentException(String.format(NON_EMPTY_MSG, "Endpoint"));
+        }
 
         return endpoint;
     }

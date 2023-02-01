@@ -11,7 +11,7 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -101,10 +101,12 @@ public final class AppConfigurationProperties {
      */
     @PostConstruct
     public void validateAndInit() {
-        Assert.notEmpty(this.stores, "At least one config store has to be configured.");
+        if (CollectionUtils.isEmpty(this.stores)) {
+            throw new IllegalArgumentException("At least one config store has to be configured.");
+        }
 
         this.stores.forEach(store -> {
-            Assert.isTrue(
+            isTrue(
                 StringUtils.hasText(store.getEndpoint()) || StringUtils.hasText(store.getConnectionString())
                     || store.getEndpoints().size() > 0 || store.getConnectionStrings().size() > 0,
                 "Either configuration store name or connection string should be configured.");
@@ -130,7 +132,13 @@ public final class AppConfigurationProperties {
             }
         }
         if (refreshInterval != null) {
-            Assert.isTrue(refreshInterval.getSeconds() >= 1, "Minimum refresh interval time is 1 Second.");
+            isTrue(refreshInterval.getSeconds() >= 1, "Minimum refresh interval time is 1 Second.");
+        }
+    }
+    
+    private static void isTrue(boolean expression, String message) {
+        if (!expression) {
+            throw new IllegalArgumentException(message);
         }
     }
 }

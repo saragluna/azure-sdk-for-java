@@ -4,8 +4,6 @@ package com.azure.spring.cloud.config.implementation.properties;
 
 import static com.azure.spring.cloud.config.implementation.AppConfigurationConstants.EMPTY_LABEL;
 
-import org.springframework.util.Assert;
-
 import jakarta.annotation.PostConstruct;
 
 /**
@@ -50,7 +48,9 @@ public final class AppConfigurationStoreTrigger {
      */
     @PostConstruct
     public void validateAndInit() {
-        Assert.notNull(key, "All Triggers need a key value set.");
+        if (key == null) {
+            throw new IllegalArgumentException( "All Triggers need a key value set.");
+        }
     }
 
     private String mapLabel(String label) {
