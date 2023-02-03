@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.azure.spring.cloud.autoconfigure.implementation.context.properties.AzureGlobalProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.convert.DurationStyle;
@@ -22,7 +23,6 @@ import com.azure.core.http.policy.RetryPolicy;
 import com.azure.core.http.policy.RetryStrategy;
 import com.azure.data.appconfiguration.ConfigurationClientBuilder;
 import com.azure.identity.ManagedIdentityCredentialBuilder;
-import com.azure.spring.cloud.autoconfigure.context.AzureGlobalProperties;
 import com.azure.spring.cloud.autoconfigure.implementation.appconfiguration.AzureAppConfigurationProperties;
 import com.azure.spring.cloud.config.AppConfigurationCredentialProvider;
 import com.azure.spring.cloud.config.ConfigurationClientCustomizer;
@@ -86,7 +86,7 @@ public class AppConfigurationReplicaClientsBuilder implements EnvironmentAware {
 
     /**
      * Given a connection string, returns the endpoint inside of it.
-     * 
+     *
      * @param connectionString connection string to app configuration
      * @return endpoint
      * @throws IllegalStateException when connection string isn't valid.
@@ -102,7 +102,7 @@ public class AppConfigurationReplicaClientsBuilder implements EnvironmentAware {
         }
 
         String endpoint = matcher.group(1);
-        
+
         if (!StringUtils.hasText(endpoint)) {
             throw new IllegalArgumentException(String.format(NON_EMPTY_MSG, "Endpoint"));
         }
@@ -130,7 +130,7 @@ public class AppConfigurationReplicaClientsBuilder implements EnvironmentAware {
 
     /**
      * Builds all the clients for a connection.
-     * 
+     *
      * @throws IllegalArgumentException when more than 1 connection method is given.
      */
     List<AppConfigurationReplicaClient> buildClients(ConfigStore configStore) {

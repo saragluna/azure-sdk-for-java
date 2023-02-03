@@ -10,11 +10,11 @@ import static com.azure.spring.cloud.config.implementation.TestConstants.TEST_ST
 import static com.azure.spring.cloud.config.implementation.TestUtils.propPair;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.azure.spring.cloud.autoconfigure.implementation.context.AzureGlobalPropertiesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import com.azure.spring.cloud.autoconfigure.context.AzureGlobalPropertiesAutoConfiguration;
 import com.azure.spring.cloud.config.implementation.AppConfigurationPropertySourceLocator;
 import com.azure.spring.cloud.config.implementation.AppConfigurationReplicaClientFactory;
 
